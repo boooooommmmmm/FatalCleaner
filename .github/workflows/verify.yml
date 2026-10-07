@@ -30,6 +30,10 @@ jobs:
       - name: Build, test and verify public signatures
         shell: pwsh
         run: ./tools/verify.ps1 -Configuration '${{ matrix.configuration }}'
+      - name: Publish and smoke test portable executable
+        if: matrix.configuration == 'Release'
+        shell: pwsh
+        run: ./tools/publish.ps1 -Out publish/ci-compat -PortableOut publish/ci-portable | Tee-Object artifacts/verification/Release/portable.txt
       - name: Save verification results
         if: always()
         uses: actions/upload-artifact@v7

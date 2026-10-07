@@ -7,6 +7,17 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:StartupViewModel}">
     <UserControl.Resources>
+        <Style x:Key="Startup.StateBadge" TargetType="Border">
+            <Setter Property="Background" Value="#087F67"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="7,3"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Enabled}" Value="False">
+                    <Setter Property="Background" Value="#52637A"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
         <Style x:Key="SuggestionText" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="{StaticResource Brush.TextSecondary}"/>
@@ -103,6 +114,12 @@
                           ToolTip="显示微软自带的服务与计划任务（默认隐藏）"/>
             </WrapPanel>
             <TextBlock Text="{Binding Summary}" Margin="0,6,0,0" TextWrapping="Wrap" FontWeight="SemiBold"/>
+            <WrapPanel Margin="0,6,0,0" ToolTip="颜色仅表示启动状态，不代表风险等级或禁用建议。">
+                <Border Background="#087F67" Width="8" Height="8" CornerRadius="4" Margin="0,0,6,0"/>
+                <TextBlock Text="绿色：已启用 / 服务自动启动" FontSize="12" Margin="0,0,18,0" Foreground="#225F53"/>
+                <Border Background="#52637A" Width="8" Height="8" CornerRadius="4" Margin="0,0,6,0"/>
+                <TextBlock Text="灰色：已禁用 / 服务非自动" FontSize="12" Foreground="#52637A"/>
+            </WrapPanel>
         </StackPanel>
 
         <!-- 列表 -->
@@ -128,6 +145,43 @@
                         <Style TargetType="ListViewItem">
                             <Setter Property="ToolTip" Value="{Binding ToolTipText}"/>
                             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Background" Value="#E4F4F0"/>
+                            <Setter Property="BorderBrush" Value="#087F67"/>
+                            <Setter Property="Foreground" Value="#183F36"/>
+                            <Setter Property="Margin" Value="0,2"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListViewItem">
+                                        <Grid Background="{TemplateBinding Background}">
+                                            <Border Width="4" HorizontalAlignment="Left" Background="{TemplateBinding BorderBrush}"/>
+                                            <GridViewRowPresenter Margin="8,6" Content="{TemplateBinding Content}"
+                                                                  Columns="{Binding View.Columns, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                            <Border x:Name="SelectionOutline" BorderThickness="1" BorderBrush="Transparent" IsHitTestVisible="False"/>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="SelectionOutline" Property="BorderBrush" Value="#9AAFC5"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="SelectionOutline" Property="BorderBrush" Value="#226BC2"/>
+                                                <Setter TargetName="SelectionOutline" Property="BorderThickness" Value="2"/>
+                                            </Trigger>
+                                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                                <Setter TargetName="SelectionOutline" Property="BorderBrush" Value="#226BC2"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Enabled}" Value="False">
+                                    <Setter Property="Background" Value="#EDF0F5"/>
+                                    <Setter Property="BorderBrush" Value="#718096"/>
+                                    <Setter Property="Foreground" Value="#52637A"/>
+                                </DataTrigger>
+                            </Style.Triggers>
                         </Style>
                     </ListView.ItemContainerStyle>
                     <ListView.View>
@@ -141,7 +195,16 @@
                                                 AutomationProperties.Name="{Binding ToggleText}">
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                                    <Setter Property="Background" Value="#FFF1DB"/>
+                                                    <Setter Property="Foreground" Value="#85400F"/>
+                                                    <Setter Property="BorderBrush" Value="#D8AC70"/>
+                                                    <Setter Property="FontWeight" Value="SemiBold"/>
                                                     <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Enabled}" Value="False">
+                                                            <Setter Property="Background" Value="#087F67"/>
+                                                            <Setter Property="Foreground" Value="White"/>
+                                                            <Setter Property="BorderBrush" Value="#087F67"/>
+                                                        </DataTrigger>
                                                         <DataTrigger Binding="{Binding DataContext.IsBusy, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
                                                             <Setter Property="IsEnabled" Value="False"/>
                                                         </DataTrigger>
@@ -152,7 +215,15 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn Header="状态" Width="80" DisplayMemberBinding="{Binding StateText}"/>
+                            <GridViewColumn Header="状态" Width="96">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type vm:StartupRow}">
+                                        <Border Style="{StaticResource Startup.StateBadge}">
+                                            <TextBlock Text="{Binding StateText}" Foreground="White" FontSize="12" FontWeight="SemiBold"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
                             <GridViewColumn Header="名称" Width="230">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate DataType="{x:Type vm:StartupRow}">

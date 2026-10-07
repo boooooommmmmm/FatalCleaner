@@ -33,6 +33,12 @@ public sealed class StartupActionTests
         Assert.True(point.Y >= 0 && point.Y + button.ActualHeight <= 600);
         var list = Assert.Single(Descendants(page).OfType<ListView>());
         Assert.Equal(ScrollBarVisibility.Auto, ScrollViewer.GetHorizontalScrollBarVisibility(list));
+        var container = (ListViewItem)list.ItemContainerGenerator.ContainerFromItem(row);
+        var enabledBackground = container.Background;
+        var disableBackground = button.Background;
+        container.IsSelected = true;
+        Layout(page, width);
+        Assert.Equal(enabledBackground, container.Background);
         Save(page, width);
 
         Assert.Same(row.ToggleCommand, button.Command);
@@ -41,11 +47,15 @@ public sealed class StartupActionTests
         Layout(page, width);
         Assert.Equal(new[] { false }, requests);
         Assert.Equal("启用", button.Content);
+        Assert.NotEqual(enabledBackground, container.Background);
+        Assert.NotEqual(disableBackground, button.Background);
         Assert.Contains(Descendants(page).OfType<TextBlock>(), b => b.Text == "已禁用");
         // Existing operation failure/cancel path restores the display without another request.
         row.SetEnabledSilently(true);
         Layout(page, width);
         Assert.Equal("禁用", button.Content);
+        Assert.Equal(enabledBackground, container.Background);
+        Assert.Equal(disableBackground, button.Background);
         Assert.Single(requests);
         model.IsBusy = true;
         Layout(page, width);
@@ -95,13 +105,20 @@ public sealed class StartupActionTests
     public sealed class Preview : ObservableObject
     {
         private bool _isBusy;
-        public Preview(StartupRow row) { Rows.Add(row); View = CollectionViewSource.GetDefaultView(Rows); }
+        public Preview(StartupRow row)
+        {
+            Rows.Add(row);
+            Rows.Add(Row(false));
+            Rows.Add(Row(false, kind: StartupKind.Service));
+            View = CollectionViewSource.GetDefaultView(Rows);
+            View.GroupDescriptions.Add(new PropertyGroupDescription(nameof(StartupRow.KindText)));
+        }
         public bool IsBusy { get => _isBusy; set => SetProperty(ref _isBusy, value); }
         public ObservableCollection<StartupRow> Rows { get; } = new();
         public System.ComponentModel.ICollectionView View { get; }
         public ObservableCollection<BootBar> Boots { get; } = new();
         public string BootSummary => "最近一次开机 23.4 秒";
-        public string Summary => "1 项，其中 1 项已启用";
+        public string Summary => "3 项，其中 1 项已启用";
         public string Status => "微软自带的服务与计划任务默认隐藏。";
         public int RecommendCount => 0;
         public bool ShowMicrosoft { get; set; }

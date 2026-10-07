@@ -25,6 +25,19 @@ public sealed record DataSetLocation(DataKind Kind, string Directory, bool FromU
 /// </summary>
 public static class DataSets
 {
+    /// <summary>发布版始终以内嵌签名数据为基线，在线更新只能采用已验签且更高的版本。</summary>
+    public static DataSetLocation LocateInstalled(DataKind kind, string? updateDir)
+    {
+        var bundled = EmbeddedDataSets.Verify(kind);
+        if (updateDir is not null && Directory.Exists(updateDir))
+        {
+            var updated = SignedManifest.Verify(updateDir, KindName(kind), TrustedKeys.Current);
+            if (updated.Ok && (!bundled.Ok || updated.Version > bundled.Version))
+                return new DataSetLocation(kind, updateDir, true, updated);
+        }
+        return new DataSetLocation(kind, "程序内置 / " + KindName(kind), false, bundled);
+    }
+
     public static string KindName(DataKind kind) => kind switch
     {
         DataKind.Rules => "rules",

@@ -68,10 +68,10 @@ try {
                 if ($relative -ne 'install-files.txt' -and -not $expectedFiles.Contains($relative)) { throw "文件未列入安装清单：$relative" }
             }
         }
-        foreach ($file in @('CleanSweep.exe', 'CleanSweep.dll', 'CleanSweep.Service.exe', 'CleanSweep.Service.dll')) {
+        foreach ($file in @('CleanSweep.exe', 'CleanSweep.Service.exe', 'CleanSweep.Service.dll')) {
             if (-not $expectedFiles.Contains($file)) { throw "发布产物缺少必要文件：$file" }
         }
-        foreach ($file in @('CleanSweep.dll', 'CleanSweep.Service.dll')) {
+        foreach ($file in @('CleanSweep.exe', 'CleanSweep.Service.dll')) {
             $binaryVersion = ([Diagnostics.FileVersionInfo]::GetVersionInfo((Join-Path $packageRoot $file)).ProductVersion -split '\+')[0]
             if ([version]$binaryVersion -ne [version]$appVersion) { throw "$file 的版本与当前源码不一致" }
         }

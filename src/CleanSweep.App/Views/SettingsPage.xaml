@@ -248,7 +248,7 @@
                                 <DockPanel LastChildFill="True">
                                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                                         <Button Content="检查规则更新" Command="{Binding CheckDataUpdatesCommand}" Margin="0,0,8,0"/>
-                                        <Button Content="打开规则目录" Command="{Binding OpenRulesDirCommand}"/>
+                                        <Button Content="查看规则更新目录" Command="{Binding OpenRulesDirCommand}"/>
                                         <Button Content="重新加载" Command="{Binding ReloadRulesCommand}" Margin="8,0,0,0"/>
                                     </StackPanel>
                                     <TextBlock Text="规则库" FontWeight="SemiBold" FontSize="15" VerticalAlignment="Center" Margin="0,0,12,0"/>

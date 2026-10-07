@@ -55,7 +55,8 @@ public sealed class AppServices
                 "新版本已准备好", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question)
                 == System.Windows.MessageBoxResult.Yes);
         },
-        zip => AppUpdater.LaunchApply(AppContext.BaseDirectory.TrimEnd('\\'), zip),
+        zip => AppUpdater.LaunchApply(AppContext.BaseDirectory.TrimEnd('\\'), zip,
+            Path.GetFileName(System.Environment.ProcessPath) ?? AppUpdater.ExeName),
         () => System.Windows.Application.Current.Shutdown(0),
         restore: RestoreAppUpdateAsync,
         installBlocker: () => _dataUpdateGate.CurrentCount == 0 ? "规则库正在更新" : UpdateInstallBlocker());
@@ -189,7 +190,7 @@ public sealed class AppServices
         var status = new List<DataSetLocation>();
         DataSetLocation Locate(DataKind kind)
         {
-            var loc = DataSets.Locate(kind, AppPaths.BundledDir(kind), AppPaths.UpdateDir(kind));
+            var loc = DataSets.LocateInstalled(kind, AppPaths.UpdateDir(kind));
             status.Add(loc);
             if (!loc.Verdict.Ok) Log.Write(null, loc.KindName, "signature", loc.Directory, 0, false, loc.Verdict.Reason);
             return loc;

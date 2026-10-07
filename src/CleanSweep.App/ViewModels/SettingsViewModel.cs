@@ -454,7 +454,13 @@ public sealed partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private void OpenRulesDir()
     {
-        try { Process.Start(new ProcessStartInfo("explorer.exe", $"\"{AppPaths.BundledRulesDir}\"") { UseShellExecute = true }); } catch { }
+        var dir = AppPaths.UpdateDir(Core.Integrity.DataKind.Rules);
+        if (!Directory.Exists(dir))
+        {
+            MessageBox.Show("当前使用程序内置规则，可在此页检查规则更新。", "FatalCleaner", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        try { Process.Start(new ProcessStartInfo("explorer.exe", $"\"{dir}\"") { UseShellExecute = true }); } catch { }
     }
 
     private static string CategoryName(string c) => c switch

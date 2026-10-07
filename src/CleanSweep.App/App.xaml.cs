@@ -18,6 +18,12 @@ public partial class App : Application
         DispatcherUnhandledException += OnDispatcherUnhandledException;
         TaskScheduler.UnobservedTaskException += (_, args) => args.SetObserved();
 
+        if (e.Args.Length == 1 && e.Args[0] == "--verify-portable")
+        {
+            Shutdown(PortableDiagnostics.Run());
+            return;
+        }
+
         // 自更新阶段二：本进程是安装目录里的旧版本（可信位置），复验下载的压缩包并解压到安装目录的暂存区，再把替换交给那里的新程序
         if (e.Args.Length >= 3 && e.Args[0] == "--apply-update")
         {
@@ -33,7 +39,8 @@ public partial class App : Application
         if (e.Args.Length >= 4 && e.Args[0] == "--apply-update-run")
         {
             var error = int.TryParse(e.Args[2], out var guiPid) && int.TryParse(e.Args[3], out var stagerPid)
-                ? CleanSweep.Core.Integrity.AppUpdater.ApplyFromStagedExe(e.Args[1], guiPid, stagerPid)
+                ? CleanSweep.Core.Integrity.AppUpdater.ApplyFromStagedExe(e.Args[1], guiPid, stagerPid,
+                    executableName: e.Args.Length >= 5 ? e.Args[4] : CleanSweep.Core.Integrity.AppUpdater.ExeName)
                 : "参数无效";
             if (error is not null) MessageBox.Show("更新未完成：" + error, "FatalCleaner 更新", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(error is null ? 0 : 1);

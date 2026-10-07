@@ -33,7 +33,7 @@ public sealed class MemoryManager
         "System", "Idle", "Registry", "smss.exe", "csrss.exe", "wininit.exe", "winlogon.exe", "services.exe", "lsass.exe", "svchost.exe",
         "dwm.exe", "fontdrvhost.exe", "sihost.exe", "ctfmon.exe", "audiodg.exe", "spoolsv.exe", "explorer.exe", "SearchHost.exe", "StartMenuExperienceHost.exe",
         "ShellExperienceHost.exe", "RuntimeBroker.exe", "taskhostw.exe", "conhost.exe", "MsMpEng.exe", "NisSrv.exe", "SecurityHealthService.exe", "WmiPrvSE.exe",
-        "LsaIso.exe", "MemCompression", "Secure System", "wlanext.exe", "dllhost.exe", "TextInputHost.exe", "LogonUI.exe", "userinit.exe", "CleanSweep.exe",
+        "LsaIso.exe", "MemCompression", "Secure System", "wlanext.exe", "dllhost.exe", "TextInputHost.exe", "LogonUI.exe", "userinit.exe", "CleanSweep.exe", "FatalCleaner.exe",
     };
 
     private readonly RegistryBackup _backup;

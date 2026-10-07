@@ -45,7 +45,7 @@ public sealed class PopupBlocker : IDisposable
     {
         "explorer.exe", "svchost.exe", "csrss.exe", "winlogon.exe", "wininit.exe", "services.exe", "lsass.exe", "smss.exe", "dwm.exe", "taskhostw.exe",
         "RuntimeBroker.exe", "SearchHost.exe", "StartMenuExperienceHost.exe", "ShellExperienceHost.exe", "sihost.exe", "ctfmon.exe", "conhost.exe", "cmd.exe",
-        "powershell.exe", "pwsh.exe", "rundll32.exe", "regsvr32.exe", "msiexec.exe", "wuauclt.exe", "MsMpEng.exe", "SecurityHealthSystray.exe", "CleanSweep.exe",
+        "powershell.exe", "pwsh.exe", "rundll32.exe", "regsvr32.exe", "msiexec.exe", "wuauclt.exe", "MsMpEng.exe", "SecurityHealthSystray.exe", "CleanSweep.exe", "FatalCleaner.exe",
         "chrome.exe", "msedge.exe", "firefox.exe", "notepad.exe", "WeChat.exe", "Weixin.exe", "QQ.exe", "DingTalk.exe", "Code.exe", "devenv.exe",
     };
 

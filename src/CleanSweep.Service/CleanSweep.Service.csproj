@@ -8,7 +8,7 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>CleanSweep.Service</RootNamespace>
     <AssemblyName>CleanSweep.Service</AssemblyName>
-    <Version>0.23.1</Version>
+    <Version>0.24.0</Version>
     <Product>FatalCleaner</Product>
     <AssemblyTitle>FatalCleaner</AssemblyTitle>
     <Description>FatalCleaner · Windows 系统清理与优化</Description>

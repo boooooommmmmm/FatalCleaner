@@ -8,6 +8,8 @@
 
 入口：[文档索引](docs/README.md) · [当前状态](docs/当前状态.md) · [后续开发计划](docs/后续开发计划.md) · [发布流程](docs/发布流程.md) · [v0.23.1 发布验收](docs/releases/发布验收-v0.23.1.md)。
 
+本地新增[单文件免安装版](docs/单文件免安装与升级兼容-2026-10-07.md)，尚未发布：新用户只需 `FatalCleaner.exe`；旧用户继续从原 `CleanSweep.exe` 通过兼容 ZIP 更新，沿用数据、快捷方式与服务。公开 v0.23.1 附件仍为原 ZIP。
+
 v0.21.0 新增[清理结果分类、重新扫描与导出](docs/清理结果处理-2026-10-02.md)、[僵尸目录清理](docs/可清理范围与僵尸目录-2026-10-02.md)和[卸载后定向预览](docs/卸载后定向预览-2026-10-02.md)：有卸载记录的已知缓存、日志与空目录，限定当前用户 AppData，支持按卸载应用预览，清理前重新核对。本地 Release 验证 602 项通过，构建提交的 Debug / Release CI 均通过。
 
 当前功能：
@@ -91,7 +93,7 @@ powershell -File tools/sign-data.ps1          # 用 %USERPROFILE%\.cleansweep\ke
 ## 发布与安装
 
 ```powershell
-powershell -File tools/publish.ps1            # 自包含 + ReadyToRun → publish/win-x64，并校验三个数据集签名
+powershell -File tools/publish.ps1            # 兼容目录 publish/win-x64 + 单文件 publish/portable-win-x64/FatalCleaner.exe
 powershell -File tools/install.ps1            # 管理员：复制到 Program Files、装提权服务、快捷方式、卸载项
 iscc installer\CleanSweep.iss                 # 或用 Inno Setup 6 生成安装器（同样的步骤）
 powershell -File tools/uninstall.ps1 [-RemoveData]

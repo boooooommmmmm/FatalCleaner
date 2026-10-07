@@ -289,7 +289,7 @@ public sealed class AppUpdateTests : IDisposable
     }
 
     [Fact]
-    public void First_upgrade_without_manifest_treats_every_file_as_owned()
+    public void First_upgrade_without_manifest_preserves_files_without_proven_ownership()
     {
         var install = _t.Dir("install5");
         File.WriteAllText(Path.Combine(install, "CleanSweep.exe"), "old");
@@ -299,7 +299,7 @@ public sealed class AppUpdateTests : IDisposable
 
         Assert.Null(AppUpdater.ApplyStaged(source, install, new FakeService { IsInstalled = false }));
         Assert.Equal("new", File.ReadAllText(Path.Combine(install, "CleanSweep.exe")));
-        Assert.False(File.Exists(Path.Combine(install, "stale.dll")));
+        Assert.Equal("stale", File.ReadAllText(Path.Combine(install, "stale.dll")));
         Assert.True(File.Exists(Path.Combine(install, AppUpdater.InstallManifestName)));
     }
 

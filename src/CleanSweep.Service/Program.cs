@@ -148,7 +148,7 @@ public sealed class ElevationHost : IDisposable
         // 与界面相同的规则来源：每次请求都重新定位（内置或在线更新目录）、重新校验签名、按连接方护栏加载；校验失败一条规则都不加载
         RuleLoadResult LoadRules(PathGuard g)
         {
-            var location = Core.Integrity.DataSets.Locate(Core.Integrity.DataKind.Rules, AppPaths.BundledDir(Core.Integrity.DataKind.Rules), AppPaths.UpdateDir(Core.Integrity.DataKind.Rules));
+            var location = Core.Integrity.DataSets.LocateInstalled(Core.Integrity.DataKind.Rules, AppPaths.UpdateDir(Core.Integrity.DataKind.Rules));
             if (!location.Verdict.Ok) log.Write(null, "rules", "signature", location.Directory, 0, false, location.Verdict.Reason);
             return new RuleLoader(g).LoadContents(location.Contents);
         }

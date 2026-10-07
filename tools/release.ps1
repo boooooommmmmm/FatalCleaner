@@ -30,6 +30,9 @@ try {
     if ($Version -eq "") { $Version = $builtVersion }
     if ([version]$Version -ne [version]$builtVersion) { throw "发布版本 $Version 与程序版本 $builtVersion 不一致" }
     $asset = "FatalCleaner-$Rid-$Version.zip"
+    $portableAsset = 'FatalCleaner.exe'
+    $portableExe = "publish/portable-$Rid/$portableAsset"
+    if (-not (Test-Path -LiteralPath $portableExe -PathType Leaf)) { throw '缺少单文件免安装产物' }
     $zip = "publish/$asset"
     if (Test-Path $zip) { Remove-Item $zip -Force }
     Compress-Archive -Path "publish/$Rid/*" -DestinationPath $zip -CompressionLevel Optimal
@@ -40,6 +43,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "release verification failed" }
     Write-Host ""
     Write-Host "已生成 $zip 与 release/latest.json。"
+    Write-Host "单文件附件：$portableExe（必须与兼容 ZIP 同时发布；latest.json 仍指向 ZIP）。"
 
     if (-not $Publish) {
         Write-Host "接下来："
@@ -79,6 +83,10 @@ try {
     Write-Host "上传 $asset（$([math]::Round((Get-Item $zip).Length / 1MB)) MB）…"
     $assetInfo = Invoke-RestMethod -Method Post -Uri $uploadUrl -Headers $headers -ContentType "application/zip" -InFile $zip
     if ($assetInfo.browser_download_url -ne $url) { throw "附件地址 $($assetInfo.browser_download_url) 与 latest.json 里的 $url 不一致" }
+    $portableUploadUrl = ($rel.upload_url -replace '\{.*$', '') + "?name=$portableAsset"
+    $portableAssetInfo = Invoke-RestMethod -Method Post -Uri $portableUploadUrl -Headers $headers -ContentType 'application/octet-stream' -InFile $portableExe
+    $portableHash = (Get-FileHash -LiteralPath $portableExe -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($portableAssetInfo.digest -ne "sha256:$portableHash") { throw 'GitHub 单文件附件 digest 与本地产物不符' }
 
     # 匿名重新下载核对哈希（附件刚上传后 CDN 可能要几秒才可用）
     $expected = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()

@@ -78,6 +78,17 @@ public static class SignedManifest
     }
 
     public static ManifestVerdict Verify(string directory, ManifestDto? dto, string expectedKind, IReadOnlyDictionary<string, byte[]> trustedKeys)
+        => VerifyContents(directory, dto, expectedKind, trustedKeys, name =>
+        {
+            var path = Path.Combine(directory, name);
+            if (!File.Exists(path)) throw new FileNotFoundException($"清单列出的文件缺失：{name}");
+            if (PathGuard.IsReparsePoint(new FileInfo(path).Attributes)) throw new IOException($"文件是重解析点：{name}");
+            return File.ReadAllBytes(path);
+        });
+
+    /// <summary>目录与内嵌资源共用签名、文件名、哈希验证；加载器使用验签时的同一份字节。</summary>
+    internal static ManifestVerdict VerifyContents(string directory, ManifestDto? dto, string expectedKind,
+        IReadOnlyDictionary<string, byte[]> trustedKeys, Func<string, byte[]> readFile)
     {
         if (dto is null) return ManifestVerdict.Fail(expectedKind, "签名清单为空");
         if (!string.Equals(dto.Kind, expectedKind, StringComparison.Ordinal)) return ManifestVerdict.Fail(expectedKind, $"签名清单类型不符：{dto.Kind}");
@@ -94,10 +105,8 @@ public static class SignedManifest
         {
             if (!IsSafeName(name)) return ManifestVerdict.Fail(expectedKind, $"清单里的文件名非法：{name}");
             var path = Path.Combine(directory, name);
-            if (!File.Exists(path)) return ManifestVerdict.Fail(expectedKind, $"清单列出的文件缺失：{name}");
-            if (PathGuard.IsReparsePoint(new FileInfo(path).Attributes)) return ManifestVerdict.Fail(expectedKind, $"文件是重解析点：{name}");
             byte[] bytes;
-            try { bytes = File.ReadAllBytes(path); }
+            try { bytes = readFile(name); }
             catch (Exception ex) { return ManifestVerdict.Fail(expectedKind, $"无法读取 {name}：{ex.Message}"); }
             if (!string.Equals(HashBytes(bytes), hash, StringComparison.OrdinalIgnoreCase)) return ManifestVerdict.Fail(expectedKind, $"文件内容与清单不符（已被改动）：{name}");
             contents.Add(new VerifiedFile(path, DecodeUtf8(bytes)));

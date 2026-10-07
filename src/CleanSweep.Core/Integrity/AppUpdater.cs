@@ -125,6 +125,10 @@ public sealed class AppUpdater
     public const string BackupDirName = ".update-backup";
     public const string ReleaseInfoSuffix = ".release.json";
     public const string ExeName = "CleanSweep.exe";
+    public const string PortableExeName = "FatalCleaner.exe";
+
+    public static bool IsSupportedExeName(string name) =>
+        name.Equals(ExeName, StringComparison.OrdinalIgnoreCase) || name.Equals(PortableExeName, StringComparison.OrdinalIgnoreCase);
     /// <summary>解压后的总大小上限（自包含发布约 300 MB）。</summary>
     public const long MaxExtractedBytes = 4L * 1024 * 1024 * 1024;
 
@@ -248,15 +252,16 @@ public sealed class AppUpdater
     /// 安装目录不可写、或装有提权服务（更新前要停它）时以管理员身份启动。返回 null 表示已启动（调用方应立即退出），否则为失败原因。
     /// 执行者是安装目录里已有的程序而不是下载来的程序：下载与解压都在当前用户可写的目录，那里的内容在验签之后仍可能被替换，不能作为执行对象。
     /// </summary>
-    public static string? LaunchApply(string installDir, string zipPath)
+    public static string? LaunchApply(string installDir, string zipPath, string executableName = ExeName)
     {
-        var exe = Path.Combine(installDir, ExeName);
-        if (!File.Exists(exe)) return "安装目录里没有 " + ExeName;
+        if (!IsSupportedExeName(executableName)) return "请将程序文件名恢复为 " + PortableExeName + " 后更新";
+        var exe = Path.Combine(installDir, executableName);
+        if (!File.Exists(exe)) return "安装目录里没有 " + executableName;
         if (!File.Exists(zipPath) || !File.Exists(zipPath + ReleaseInfoSuffix)) return "下载的压缩包或发布信息不存在";
         try
         {
             var psi = new ProcessStartInfo(exe, $"--apply-update \"{zipPath}\" {System.Environment.ProcessId}") { UseShellExecute = true, WorkingDirectory = installDir };
-            if (!IsWritable(installDir) || ElevationServiceControl.Exists()) psi.Verb = "runas";
+            if (!IsWritable(installDir) || (executableName.Equals(ExeName, StringComparison.OrdinalIgnoreCase) && ElevationServiceControl.Exists())) psi.Verb = "runas";
             return Process.Start(psi) is null ? "未能启动更新程序" : null;
         }
         catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)
@@ -277,13 +282,15 @@ public sealed class AppUpdater
     public static string? StageFromInstalledExe(string zipPath, int guiPid, Version current, Action<string>? log = null)
     {
         var installDir = PathGuard.Normalize(AppContext.BaseDirectory);
+        var executableName = Path.GetFileName(System.Environment.ProcessPath) ?? ExeName;
+        if (!IsSupportedExeName(executableName)) return "不支持当前程序文件名";
         var stageDir = Path.Combine(installDir, StageDirName);
         var root = new AppUpdater().VerifyAndExtract(zipPath, stageDir, current, out var error);
         if (root is null) return error;
         log?.Invoke("已解压到 " + root);
         try
         {
-            var psi = new ProcessStartInfo(Path.Combine(root, ExeName), $"--apply-update-run \"{installDir}\" {guiPid} {System.Environment.ProcessId}")
+            var psi = new ProcessStartInfo(Path.Combine(root, ExeName), $"--apply-update-run \"{installDir}\" {guiPid} {System.Environment.ProcessId} {executableName}")
             { UseShellExecute = false, WorkingDirectory = root };
             if (Process.Start(psi) is null) return "未能启动新版本的安装程序";
         }
@@ -379,8 +386,9 @@ public sealed class AppUpdater
     /// <summary>
     /// 在新程序进程中执行：等旧界面与阶段二进程退出，替换安装目录，启动安装目录里的新版本。返回 null 表示成功。
     /// </summary>
-    public static string? ApplyFromStagedExe(string installDir, int guiPid, int stagerPid, Action<string>? log = null)
+    public static string? ApplyFromStagedExe(string installDir, int guiPid, int stagerPid, Action<string>? log = null, string executableName = ExeName)
     {
+        if (!IsSupportedExeName(executableName)) return "更新目标程序名无效";
         var source = PathGuard.Normalize(AppContext.BaseDirectory);
         installDir = PathGuard.Normalize(installDir);
         if (!PathGuard.IsSameOrUnder(source, Path.Combine(installDir, StageDirName)))
@@ -395,11 +403,12 @@ public sealed class AppUpdater
             }
             catch (ArgumentException) { /* 已退出 */ }
         }
-        var error = ApplyStaged(source, installDir, new ElevationServiceControl(), log);
+        var service = executableName.Equals(ExeName, StringComparison.OrdinalIgnoreCase) ? new ElevationServiceControl() : null;
+        var error = ApplyStaged(source, installDir, service, log, executableName);
         if (error is not null) return error;
         try
         {
-            Process.Start(new ProcessStartInfo(Path.Combine(installDir, ExeName), "--updated") { UseShellExecute = true, WorkingDirectory = installDir });
+            Process.Start(new ProcessStartInfo(Path.Combine(installDir, executableName), "--updated") { UseShellExecute = true, WorkingDirectory = installDir });
         }
         catch (Exception ex)
         {
@@ -412,30 +421,36 @@ public sealed class AppUpdater
     /// 把 sourceRoot（新版本，位于安装目录的暂存区或任何位置）应用到 installDir。事务式：先把旧版本拥有的文件改名到 .update-backup，
     /// 再复制新文件；任一步失败全部还原。不跟随重解析点；不在安装清单里、也不与新文件重名的文件一律不动。
     /// </summary>
-    public static string? ApplyStaged(string sourceRoot, string installDir, IUpdateServiceControl? service, Action<string>? log = null)
+    public static string? ApplyStaged(string sourceRoot, string installDir, IUpdateServiceControl? service, Action<string>? log = null, string executableName = ExeName)
     {
+        if (!IsSupportedExeName(executableName)) return "更新目标程序名无效";
+        var portable = executableName.Equals(PortableExeName, StringComparison.OrdinalIgnoreCase);
         sourceRoot = PathGuard.Normalize(sourceRoot);
         installDir = PathGuard.Normalize(installDir);
         if (string.Equals(sourceRoot, installDir, StringComparison.OrdinalIgnoreCase)) return "新版本目录与安装目录相同";
-        if (!File.Exists(Path.Combine(installDir, ExeName))) return $"安装目录里没有 {ExeName}：{installDir}";
+        if (!File.Exists(Path.Combine(installDir, executableName))) return $"安装目录里没有 {executableName}：{installDir}";
         if (!File.Exists(Path.Combine(sourceRoot, ExeName))) return $"新版本目录里没有 {ExeName}：{sourceRoot}";
         if (PathGuard.IsReparsePoint(installDir)) return "安装目录是重解析点";
         if (PathGuard.IsReparsePoint(sourceRoot)) return "新版本目录是重解析点";
+        if (PathGuard.IsReparsePoint(Path.Combine(installDir, executableName)) || PathGuard.IsReparsePoint(Path.Combine(sourceRoot, ExeName)))
+            return "程序文件是重解析点";
 
         var backupDir = Path.Combine(installDir, BackupDirName);
         if (DeleteTree(backupDir) is { } cleanup) return "无法清理上次更新的备份目录：" + cleanup;
 
-        var newFiles = EnumerateFilesNoReparse(sourceRoot).ToList();
+        var newFiles = portable ? new List<string> { executableName } : EnumerateFilesNoReparse(sourceRoot).ToList();
         var newSet = new HashSet<string>(newFiles, StringComparer.OrdinalIgnoreCase);
-        var owned = ReadInstallManifest(Path.Combine(installDir, InstallManifestName));
-        var existing = EnumerateFilesNoReparse(installDir, StageDirName, BackupDirName).ToList();
-        // 首次从没有安装清单的版本升级：安装目录里的文件全部视为旧版本拥有（与安装脚本的整目录复制一致）
-        var toBackup = existing.Where(rel => owned is null || owned.Contains(rel) || newSet.Contains(rel)
+        var owned = portable ? new HashSet<string>(StringComparer.OrdinalIgnoreCase) { executableName }
+            : ReadInstallManifest(Path.Combine(installDir, InstallManifestName));
+        var existing = portable ? new List<string> { executableName }
+            : EnumerateFilesNoReparse(installDir, StageDirName, BackupDirName).ToList();
+        // 缺少清单时只替换同名文件，不能把下载目录内的用户文件当作旧程序所有。
+        var toBackup = existing.Where(rel => owned?.Contains(rel) == true || newSet.Contains(rel)
                                              || string.Equals(rel, InstallManifestName, StringComparison.OrdinalIgnoreCase)).ToList();
         log?.Invoke($"新版本 {newFiles.Count} 个文件；旧版本拥有 {toBackup.Count} 个文件；保留 {existing.Count - toBackup.Count} 个非本程序文件");
 
         var wasRunning = false;
-        if (service is { IsInstalled: true })
+        if (!portable && service is { IsInstalled: true })
         {
             wasRunning = service.IsRunning;
             if (wasRunning)
@@ -463,10 +478,10 @@ public sealed class AppUpdater
                 var to = Path.Combine(installDir, rel);
                 EnsureDirectoryNoReparse(installDir, Path.GetDirectoryName(to)!);
                 if (File.Exists(to) || Directory.Exists(to)) throw new IOException($"目标位置已有对象：{rel}");
-                CopyWithRetry(Path.Combine(sourceRoot, rel), to);
+                CopyWithRetry(Path.Combine(sourceRoot, portable ? ExeName : rel), to);
                 placed.Add(rel);
             }
-            WriteInstallManifest(Path.Combine(installDir, InstallManifestName), newFiles);
+            if (!portable) WriteInstallManifest(Path.Combine(installDir, InstallManifestName), newFiles);
         }
         catch (Exception ex)
         {
