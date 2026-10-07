@@ -1,11 +1,11 @@
 {
-  "version": "0.23.0",
-  "asset": "FatalCleaner-win-x64-0.23.0.zip",
-  "url": "https://github.com/boooooommmmmm/FatalCleaner/releases/download/v0.23.0/FatalCleaner-win-x64-0.23.0.zip",
-  "sha256": "71c9ae212c42ccd284ed27ad9e93f16dac6353dba2173fc0a16a4ac0e2394a89",
-  "size": 66649097,
-  "notes": "# FatalCleaner v0.23.0\n\nCleanSweep 正式更名为 **FatalCleaner**，GitHub 仓库同步更名为 `boooooommmmmm/FatalCleaner`。\n\n## 新品牌与图标\n\n- 主窗口、侧栏、更新提示、程序属性及导出文件名使用 FatalCleaner。\n- 使用全新的硬盘与扫帚图标，支持 Windows 多种图标尺寸，应用于程序、窗口和侧栏。\n- 发布包更名为 `FatalCleaner-win-x64-0.23.0.zip`。\n\n## 界面整理\n\n- 统一导航、按钮、卡片、输入框和表格样式，页面布局更清晰。\n- 设置页分为“常规与清理”“备份与白名单”“更新与记录”，程序更新独立展示。\n- 内存页分为“运行中的进程”和“后台运行权限”，进程列表获得完整宽度。\n- 一键优化首页在处理完成后再展示结果卡，减少初始页面的信息干扰。\n\n## 一键优化动画\n\n- 增加完成光环、结果卡入场和数字依次变化效果。\n- 快速任务正常完成后补足约 3 秒的展示节奏，真实处理时间计入其中。\n- 提前结束时明确显示工作已经完成，可点击“立即查看结果”跳过动画。\n- 系统关闭动画、取消或处理失败时不增加展示等待；所有结果仍按实际测量显示。\n\n## 修复与更新兼容\n\n- 合并高频下载进度通知，固定提示区域，减少下载过程中界面闪烁。\n- 默认更新来源切换至新仓库，兼容已保存的旧官方来源，保留自定义来源和指定分支。\n- 更新仍采用后台下载并校验、询问用户后安装的流程。\n\n## 升级说明\n\n- 保留 `CleanSweep.exe`、原数据目录、隔离区和服务标识，兼容已有安装与更新流程。\n- 解压 ZIP 后运行 `CleanSweep.exe`；界面和产品名称已是 FatalCleaner。\n- 本包为 Windows x64 自包含版本，无需另行安装 .NET。\n- 旧快捷方式或已登记的系统显示名称可能保留；程序文件中的图标已更新。\n- 规则库仍为 v6，指纹库及弹窗规则仍为 v5。\n",
-  "generated": "2026-10-07T01:58:03Z",
+  "version": "0.23.1",
+  "asset": "FatalCleaner-win-x64-0.23.1.zip",
+  "url": "https://github.com/boooooommmmmm/FatalCleaner/releases/download/v0.23.1/FatalCleaner-win-x64-0.23.1.zip",
+  "sha256": "f861a4ac233c9c6f3f383a22b1af53093a84857a9aecd25dcc1cefcd5417b988",
+  "size": 66651126,
+  "notes": "# FatalCleaner v0.23.1\n\n## 开机加速操作更直观\n\n- 将原来“启用”列的复选框改为每行左侧明确的 **禁用／启用** 按钮，旁边独立显示当前状态。\n- 没有“建议禁用”项时，仍可使用单项按钮，不需要横向滚动寻找操作入口。\n- 服务项明确显示 **改为手动／设为自动**，保留原来的确认、备份及还原点流程。\n- 受限制的项目保留灰色按钮并显示原因提示；处理过程中暂停按钮交互，防止重复操作。\n- 工具栏支持换行，统计文字单独显示，避免窄窗口下重叠；列表可横向滚动查看更多信息。\n\n## 升级说明\n\n沿用 v0.23.0 的 FatalCleaner 品牌、硬盘扫帚图标和更新流程。Windows x64 自包含 ZIP 解压后运行 `CleanSweep.exe`；内部文件名及数据目录保留以兼容旧版升级。已有设置、隔离区和备份继续使用。\n\n规则库 v6、指纹库 v5、弹窗规则 v5 保持不变。\n",
+  "generated": "2026-10-07T03:19:22Z",
   "keyId": "release-2026-09",
-  "signature": "O6zxkPGtIpfhR0c6NOC4sRbxO89HOamcprrFz4RqDC9FrMq23PVxQEk3sINgDB2w1VJfyVcT8NB0loAX5faq0Q=="
+  "signature": "PJgQwHMmFdPua1OfHJjjQWZwN2uvZ1nRR4eLcSxs91WBLecAVxUUG/sj8gs7hOCkcHtwxyvc6V0wm8BuDqTsQg=="
 }
