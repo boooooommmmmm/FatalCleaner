@@ -26,6 +26,7 @@ public sealed partial class StartupRow : ObservableObject
     public StartupItem Item { get; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ToggleText), nameof(StateText))]
     private bool _enabled;
 
     /// <summary>用户切换开关时触发；程序回写状态时不触发。</summary>
@@ -50,6 +51,19 @@ public sealed partial class StartupRow : ObservableObject
     public string Command => Item.Command ?? "";
     public string? Note => Item.Note;
     public bool CanToggle => Item.CanToggle;
+    public string ToggleText => Item.Kind == StartupKind.Service
+        ? (Enabled ? "改为手动" : "设为自动") : (Enabled ? "禁用" : "启用");
+    public string StateText => Item.Kind == StartupKind.Service
+        ? (Enabled ? "自动启动" : "非自动") : (Enabled ? "已启用" : "已禁用");
+    public string ToggleHint => !CanToggle ? (Note ?? "此项目当前不支持切换，请检查权限或系统策略。")
+        : Item.Kind == StartupKind.Service ? "调整服务启动类型前会确认并备份。"
+        : "禁用保留原始启动项，可随时重新启用。";
+
+    [RelayCommand(CanExecute = nameof(CanToggle))]
+    private void Toggle()
+    {
+        if (CanToggle) Enabled = !Enabled;
+    }
     public bool CanDelete => Item.CanDelete;
     public bool CanDelay => Item.CanDelay;
     public bool CanOpenLocation => Item.ExePath is not null && File.Exists(Item.ExePath);

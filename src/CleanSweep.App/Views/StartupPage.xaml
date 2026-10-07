@@ -56,7 +56,7 @@
 
         <StackPanel Grid.Row="0">
             <TextBlock Text="开机加速" Style="{StaticResource Text.Title}"/>
-            <TextBlock Text="管理随系统启动的程序、计划任务与服务。禁用不会删除原始项，与任务管理器状态同步，随时可恢复；任何注册表改动前自动备份。"
+            <TextBlock Text="点击每行左侧“禁用”可关闭开机启动，之后可重新启用。服务需逐项确认改为手动启动；修改前自动备份。"
                        Style="{StaticResource Text.Subtitle}" Margin="0,4,0,0"/>
         </StackPanel>
 
@@ -90,8 +90,8 @@
         </Border>
 
         <!-- 工具栏 -->
-        <Grid Grid.Row="2" Margin="0,14,0,10">
-            <StackPanel Orientation="Horizontal">
+        <StackPanel Grid.Row="2" Margin="0,14,0,10">
+            <WrapPanel>
                 <Button Content="刷新" Style="{StaticResource Button.Primary}" Command="{Binding RefreshCommand}" MinWidth="90"/>
                 <Button Command="{Binding DisableRecommendedCommand}" Margin="8,0,0,0"
                         Visibility="{Binding RecommendCount, Converter={StaticResource CountToVis}}">
@@ -101,14 +101,15 @@
                 </Button>
                 <CheckBox Content="显示微软项" IsChecked="{Binding ShowMicrosoft}" VerticalAlignment="Center" Margin="16,0,0,0"
                           ToolTip="显示微软自带的服务与计划任务（默认隐藏）"/>
-            </StackPanel>
-            <TextBlock Text="{Binding Summary}" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold"/>
-        </Grid>
+            </WrapPanel>
+            <TextBlock Text="{Binding Summary}" Margin="0,6,0,0" TextWrapping="Wrap" FontWeight="SemiBold"/>
+        </StackPanel>
 
         <!-- 列表 -->
         <Border Grid.Row="3" Style="{StaticResource Card}" Padding="0">
             <Grid>
-                <ListView ItemsSource="{Binding View}" BorderThickness="0" SelectionMode="Single" AutomationProperties.Name="启动项列表">
+                <ListView ItemsSource="{Binding View}" BorderThickness="0" SelectionMode="Single" AutomationProperties.Name="启动项列表"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto">
                     <ListView.GroupStyle>
                         <GroupStyle>
                             <GroupStyle.HeaderTemplate>
@@ -131,14 +132,27 @@
                     </ListView.ItemContainerStyle>
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="启用" Width="50">
+                            <GridViewColumn Header="启用 / 禁用" Width="100">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate DataType="{x:Type vm:StartupRow}">
-                                        <CheckBox IsChecked="{Binding Enabled, Mode=TwoWay}" IsEnabled="{Binding CanToggle}" HorizontalAlignment="Center"
-                                                  AutomationProperties.Name="{Binding Name}"/>
+                                        <Button Content="{Binding ToggleText}" Command="{Binding ToggleCommand}"
+                                                MinWidth="78" Padding="8,4" ToolTip="{Binding ToggleHint}"
+                                                ToolTipService.ShowOnDisabled="True"
+                                                AutomationProperties.Name="{Binding ToggleText}">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DataContext.IsBusy, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
+                            <GridViewColumn Header="状态" Width="80" DisplayMemberBinding="{Binding StateText}"/>
                             <GridViewColumn Header="名称" Width="230">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate DataType="{x:Type vm:StartupRow}">
@@ -185,7 +199,7 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn Header="操作" Width="210">
+                            <GridViewColumn Header="更多操作" Width="210">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate DataType="{x:Type vm:StartupRow}">
                                         <StackPanel Orientation="Horizontal">
