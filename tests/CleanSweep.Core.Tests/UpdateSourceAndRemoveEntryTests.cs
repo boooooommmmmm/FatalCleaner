@@ -29,10 +29,10 @@ public sealed class UpdateSourceAndRemoveEntryTests : IDisposable
         {
             var s = UpdateSources.Resolve(setting);
             Assert.NotNull(s);
-            Assert.Equal("https://raw.githubusercontent.com/boooooommmmmm/Cleaner/main", s!.DataBaseUrl);
-            Assert.Equal("https://raw.githubusercontent.com/boooooommmmmm/Cleaner/main/release/latest.json", s.ReleaseInfoUrl);
-            Assert.Equal("https://cdn.jsdelivr.net/gh/boooooommmmmm/Cleaner@main", s.FallbackDataBaseUrl);
-            Assert.Equal("https://cdn.jsdelivr.net/gh/boooooommmmmm/Cleaner@main/release/latest.json", s.FallbackReleaseInfoUrl);
+            Assert.Equal("https://raw.githubusercontent.com/boooooommmmmm/FatalCleaner/main", s!.DataBaseUrl);
+            Assert.Equal("https://raw.githubusercontent.com/boooooommmmmm/FatalCleaner/main/release/latest.json", s.ReleaseInfoUrl);
+            Assert.Equal("https://cdn.jsdelivr.net/gh/boooooommmmmm/FatalCleaner@main", s.FallbackDataBaseUrl);
+            Assert.Equal("https://cdn.jsdelivr.net/gh/boooooommmmmm/FatalCleaner@main/release/latest.json", s.FallbackReleaseInfoUrl);
         }
         var branch = UpdateSources.Resolve("someone/Fork@dev")!;
         Assert.Equal("https://cdn.jsdelivr.net/gh/someone/Fork@dev", branch.FallbackDataBaseUrl);
@@ -45,6 +45,19 @@ public sealed class UpdateSourceAndRemoveEntryTests : IDisposable
 
         Assert.Null(UpdateSources.Resolve("not a repo"));
         Assert.Null(UpdateSources.Resolve("a/b/c"));
+    }
+
+    [Theory]
+    [InlineData("boooooommmmmm/Cleaner", "main")]
+    [InlineData(" boooooommmmmm/cleaner/ ", "main")]
+    [InlineData("boooooommmmmm/Cleaner@dev", "dev")]
+    public void Legacy_official_repository_resolves_to_renamed_repository(string setting, string branch)
+    {
+        var source = UpdateSources.Resolve(setting)!;
+        Assert.Equal($"https://raw.githubusercontent.com/boooooommmmmm/FatalCleaner/{branch}", source.DataBaseUrl);
+        Assert.Equal($"https://cdn.jsdelivr.net/gh/boooooommmmmm/FatalCleaner@{branch}/release/latest.json", source.FallbackReleaseInfoUrl);
+        Assert.Equal("https://raw.githubusercontent.com/someone/Cleaner/main", UpdateSources.Resolve("someone/Cleaner")!.DataBaseUrl);
+        Assert.Equal("https://example.com/Cleaner", UpdateSources.Resolve("https://example.com/Cleaner")!.DataBaseUrl);
     }
 
     [Theory]

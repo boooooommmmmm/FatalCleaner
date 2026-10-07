@@ -101,7 +101,7 @@ public sealed partial class ShellViewModel : ObservableObject
         var err = ElevationContext.RelaunchElevated();
         if (err is not null)
         {
-            if (err != "已取消提权") MessageBox.Show($"无法以管理员身份重新启动：{err}", "CleanSweep", MessageBoxButton.OK, MessageBoxImage.Error);
+            if (err != "已取消提权") MessageBox.Show($"无法以管理员身份重新启动：{err}", "FatalCleaner", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
         Application.Current.Shutdown(0);

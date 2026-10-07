@@ -1,3 +1,4 @@
+using CleanSweep.App.Helpers;
 using CleanSweep.Core.Integrity;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -26,6 +27,7 @@ public sealed partial class AppUpdateCoordinator : ObservableObject
     private bool _isBusy;
     [ObservableProperty] private bool _isDownloading;
     [ObservableProperty] private double _downloadPercent;
+    [ObservableProperty] private string _downloadProgressText = "";
     [ObservableProperty] private string _status = "";
     [ObservableProperty] private ReleaseInfo? _readyRelease;
     public bool InstallationStarted { get; private set; }
@@ -135,13 +137,16 @@ public sealed partial class AppUpdateCoordinator : ObservableObject
                 Status = $"正在后台下载 {release.Version.ToString(3)}…";
                 downloading = true;
                 DownloadPercent = 0;
+                DownloadProgressText = "下载进度：0%";
                 IsDownloading = true;
-                var progress = new Progress<(long Done, long Total)>(p =>
+                using var progress = new CoalescingProgress<(long Done, long Total)>(p =>
                 {
                     if (generation == _generation && downloading && !ct.IsCancellationRequested)
                     {
                         DownloadPercent = p.Total > 0 ? Math.Clamp(p.Done * 100.0 / p.Total, 0, 100) : 0;
-                        Status = $"正在后台下载… {p.Done / 1048576.0:0.#} / {p.Total / 1048576.0:0.#} MB";
+                        DownloadProgressText = p.Total > 0
+                            ? $"下载进度：{DownloadPercent:0}% · {Math.Max(0, p.Done) / 1048576.0:0.#} / {p.Total / 1048576.0:0.#} MB"
+                            : $"已下载 {Math.Max(0, p.Done) / 1048576.0:0.#} MB";
                     }
                 });
                 var zip = await _download(release, progress, ct);

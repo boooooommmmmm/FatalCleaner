@@ -24,7 +24,7 @@ public partial class App : Application
             var error = int.TryParse(e.Args[2], out var guiPid)
                 ? CleanSweep.Core.Integrity.AppUpdater.StageFromInstalledExe(e.Args[1], guiPid, CurrentVersion)
                 : "参数无效";
-            if (error is not null) MessageBox.Show("更新未完成，现有安装未改动：" + error, "CleanSweep 更新", MessageBoxButton.OK, MessageBoxImage.Error);
+            if (error is not null) MessageBox.Show("更新未完成，现有安装未改动：" + error, "FatalCleaner 更新", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(error is null ? 0 : 1);
             return;
         }
@@ -35,7 +35,7 @@ public partial class App : Application
             var error = int.TryParse(e.Args[2], out var guiPid) && int.TryParse(e.Args[3], out var stagerPid)
                 ? CleanSweep.Core.Integrity.AppUpdater.ApplyFromStagedExe(e.Args[1], guiPid, stagerPid)
                 : "参数无效";
-            if (error is not null) MessageBox.Show("更新未完成：" + error, "CleanSweep 更新", MessageBoxButton.OK, MessageBoxImage.Error);
+            if (error is not null) MessageBox.Show("更新未完成：" + error, "FatalCleaner 更新", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(error is null ? 0 : 1);
             return;
         }
@@ -48,7 +48,7 @@ public partial class App : Application
         catch (AbandonedMutexException) { acquired = true; }
         if (!acquired)
         {
-            MessageBox.Show("CleanSweep 已在运行。", "CleanSweep", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("FatalCleaner 已在运行。", "FatalCleaner", MessageBoxButton.OK, MessageBoxImage.Information);
             Shutdown(0);
             return;
         }
@@ -61,7 +61,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"初始化失败：\n{ex}", "CleanSweep", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"初始化失败：\n{ex}", "FatalCleaner", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
             return;
         }
@@ -99,7 +99,7 @@ public partial class App : Application
             {
                 Dispatcher.Invoke(() => MessageBox.Show(
                     $"检测到 {unfinished.Count} 个上次未正常结束的清理批次。已移入隔离区的文件仍可在“隔离区”页面恢复。",
-                    "CleanSweep", MessageBoxButton.OK, MessageBoxImage.Information));
+                    "FatalCleaner", MessageBoxButton.OK, MessageBoxImage.Information));
                 foreach (var b in unfinished) Services.Log.EndBatch(b.BatchId, b.FreedBytes);
             }
 
@@ -129,7 +129,7 @@ public partial class App : Application
 
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        MessageBox.Show($"发生未处理的错误：\n{e.Exception.Message}", "CleanSweep", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show($"发生未处理的错误：\n{e.Exception.Message}", "FatalCleaner", MessageBoxButton.OK, MessageBoxImage.Error);
         try { Services?.Log.Write(null, "app", "unhandled", null, 0, false, e.Exception.ToString()); } catch { }
         e.Handled = true;
     }

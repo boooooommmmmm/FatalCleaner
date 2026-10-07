@@ -6,32 +6,46 @@
         xmlns:vm="clr-namespace:CleanSweep.App.ViewModels"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:ShellViewModel}"
-        Title="CleanSweep · Windows 系统清理"
-        Width="1180" Height="760" MinWidth="960" MinHeight="600"
+        Title="FatalCleaner · Windows 系统清理"
+        Icon="/CleanSweep;component/Assets/FatalCleaner.ico"
+        Width="1240" Height="800" MinWidth="960" MinHeight="600"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource Brush.Background}"
         FontFamily="Segoe UI, Microsoft YaHei UI"
+        FontSize="13"
+        Foreground="{StaticResource Brush.Text}"
         UseLayoutRounding="True"
         TextOptions.TextFormattingMode="Display">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="212"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- 侧栏 -->
         <Border Grid.Column="0" Background="{StaticResource Brush.Sidebar}" BorderBrush="{StaticResource Brush.Border}" BorderThickness="0,0,1,0">
             <DockPanel>
-                <StackPanel DockPanel.Dock="Top" Margin="20,22,20,18">
-                    <TextBlock Text="CleanSweep" FontSize="20" FontWeight="Bold"/>
-                    <TextBlock Text="安全优先的系统清理" Style="{StaticResource Text.Secondary}" Margin="0,2,0,0"/>
-                    <ItemsControl ItemsSource="{Binding FeaturedItems}" ItemTemplate="{StaticResource Nav.ItemTemplate}" Margin="-12,20,-12,0"/>
+                <StackPanel DockPanel.Dock="Top" Margin="14,24,14,4">
+                    <DockPanel>
+                        <Border Width="34" Height="34" Background="White" Margin="0,0,10,0">
+                            <Image x:Name="BrandIcon" Source="/CleanSweep;component/Assets/FatalCleaner.png"
+                                   Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"
+                                   AutomationProperties.Name="FatalCleaner 图标"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock x:Name="BrandName" Text="FatalCleaner" FontSize="18" FontWeight="Bold"/>
+                            <TextBlock Text="让电脑轻装运行" Style="{StaticResource Text.Secondary}" FontSize="11" Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </DockPanel>
+                    <ItemsControl ItemsSource="{Binding FeaturedItems}" ItemTemplate="{StaticResource Nav.ItemTemplate}" Margin="-10,22,-10,6"/>
+                    <Border Height="1" Background="{StaticResource Brush.Border}" Margin="0,4,0,0"/>
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom" Margin="20,0,20,16">
                     <TextBlock Text="{Binding Version}" Style="{StaticResource Text.Secondary}"/>
                     <TextBlock Text="{Binding Elevation.StatusText}" Style="{StaticResource Text.Secondary}"/>
-                    <TextBlock Text="{Binding UpdateNotice}" Foreground="{StaticResource Brush.Accent}" TextWrapping="Wrap" Margin="0,4,0,0"
+                    <TextBlock Text="{Binding UpdateNotice}" ToolTip="{Binding UpdateNotice}" Foreground="{StaticResource Brush.Accent}" TextWrapping="Wrap" Margin="0,4,0,0"
+                               Height="32" LineHeight="16" LineStackingStrategy="BlockLineHeight" TextTrimming="CharacterEllipsis"
                                Visibility="{Binding UpdateNotice, Converter={StaticResource NullToVis}}"/>
                     <Button Content="以管理员身份重新启动" Style="{StaticResource Button.Link}" HorizontalAlignment="Left" Margin="0,4,0,0" Padding="0"
                             Command="{Binding RelaunchElevatedCommand}" IsEnabled="{Binding Home.CanEditScope}"
@@ -68,6 +82,6 @@
         </Border>
 
         <!-- 内容 -->
-        <ContentControl Grid.Column="1" Content="{Binding Selected.Page}"/>
+        <ContentControl Grid.Column="1" Content="{Binding Selected.Page}" MaxWidth="1440" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
     </Grid>
 </Window>

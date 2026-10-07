@@ -45,19 +45,19 @@ if (-not $NoService) {
 # 快捷方式
 $shell = New-Object -ComObject WScript.Shell
 $programs = [Environment]::GetFolderPath("CommonPrograms")
-$lnk = $shell.CreateShortcut((Join-Path $programs "CleanSweep.lnk"))
+$lnk = $shell.CreateShortcut((Join-Path $programs "FatalCleaner.lnk"))
 $lnk.TargetPath = Join-Path $Target "CleanSweep.exe"
 $lnk.WorkingDirectory = $Target
-$lnk.Description = "CleanSweep · 安全优先的 Windows 系统清理"
+$lnk.Description = "FatalCleaner · 安全优先的 Windows 系统清理"
 $lnk.Save()
 
 # 应用和功能
 $version = (Get-Item (Join-Path $Target "CleanSweep.exe")).VersionInfo.ProductVersion
 $key = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CleanSweep"
 New-Item -Path $key -Force | Out-Null
-Set-ItemProperty $key DisplayName "CleanSweep"
+Set-ItemProperty $key DisplayName "FatalCleaner"
 Set-ItemProperty $key DisplayVersion "$version"
-Set-ItemProperty $key Publisher "CleanSweep"
+Set-ItemProperty $key Publisher "FatalCleaner"
 Set-ItemProperty $key InstallLocation $Target
 Set-ItemProperty $key DisplayIcon (Join-Path $Target "CleanSweep.exe")
 Set-ItemProperty $key UninstallString "powershell.exe -ExecutionPolicy Bypass -File `"$Target\tools\uninstall.ps1`" -Target `"$Target`""

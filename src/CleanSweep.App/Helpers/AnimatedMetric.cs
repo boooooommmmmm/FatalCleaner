@@ -11,10 +11,13 @@ public sealed class AnimatedMetric : TextBlock
         new PropertyMetadata(double.NaN, OnValueChanged));
     public static readonly DependencyProperty KindProperty = DependencyProperty.Register(nameof(Kind), typeof(string), typeof(AnimatedMetric),
         new PropertyMetadata("bytes", (d, _) => ((AnimatedMetric)d).RenderValue()));
+    public static readonly DependencyProperty DelayMillisecondsProperty = DependencyProperty.Register(nameof(DelayMilliseconds), typeof(double), typeof(AnimatedMetric),
+        new PropertyMetadata(0d, OnValueChanged), value => value is double d && double.IsFinite(d) && d >= 0);
     private static readonly DependencyProperty DisplayValueProperty = DependencyProperty.Register(nameof(DisplayValue), typeof(double), typeof(AnimatedMetric),
         new PropertyMetadata(0d, (d, _) => ((AnimatedMetric)d).RenderValue()));
     public double Value { get => (double)GetValue(ValueProperty); set => SetValue(ValueProperty, value); }
     public string Kind { get => (string)GetValue(KindProperty); set => SetValue(KindProperty, value); }
+    public double DelayMilliseconds { get => (double)GetValue(DelayMillisecondsProperty); set => SetValue(DelayMillisecondsProperty, value); }
     private double DisplayValue { get => (double)GetValue(DisplayValueProperty); set => SetValue(DisplayValueProperty, value); }
 
     public AnimatedMetric()
@@ -30,8 +33,13 @@ public sealed class AnimatedMetric : TextBlock
         if (!double.IsFinite(Value)) { Text = "—"; return; }
         if (!IsLoaded || !SystemParameters.ClientAreaAnimation) { DisplayValue = Value; RenderValue(); return; }
         DisplayValue = Value;
-        BeginAnimation(DisplayValueProperty, new DoubleAnimation(0, Value, TimeSpan.FromMilliseconds(650))
-        { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }, FillBehavior = FillBehavior.Stop });
+        var animation = new DoubleAnimationUsingKeyFrames { FillBehavior = FillBehavior.Stop };
+        animation.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.Zero)));
+        if (DelayMilliseconds > 0)
+            animation.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(DelayMilliseconds))));
+        animation.KeyFrames.Add(new EasingDoubleKeyFrame(Value, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(DelayMilliseconds + 650)))
+        { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } });
+        BeginAnimation(DisplayValueProperty, animation);
     }
     private void RenderValue()
     {

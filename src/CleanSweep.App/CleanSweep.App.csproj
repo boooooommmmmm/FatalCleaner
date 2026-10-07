@@ -10,11 +10,19 @@
     <RootNamespace>CleanSweep.App</RootNamespace>
     <AssemblyName>CleanSweep</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>0.22.0</Version>
-    <Product>CleanSweep</Product>
-    <Company>CleanSweep</Company>
+    <ApplicationIcon>Assets\FatalCleaner.ico</ApplicationIcon>
+    <Version>0.23.0</Version>
+    <Product>FatalCleaner</Product>
+    <AssemblyTitle>FatalCleaner</AssemblyTitle>
+    <Description>FatalCleaner · Windows 系统清理与优化</Description>
+    <Company>FatalCleaner</Company>
     <SatelliteResourceLanguages>zh-Hans;en</SatelliteResourceLanguages>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\FatalCleaner.png" />
+    <Resource Include="Assets\FatalCleaner.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CleanSweep.Core\CleanSweep.Core.csproj" />

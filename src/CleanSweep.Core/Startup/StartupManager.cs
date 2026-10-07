@@ -347,7 +347,7 @@ public sealed class StartupManager
         var note = triggerNote;
         if (!string.IsNullOrEmpty(delay)) note += $"，延迟 {FormatDelay(delay)}";
         if (exe is null) note += "，非可执行文件动作";
-        if (isOwn) note += "。由 CleanSweep 的“延迟启动”创建，删除即撤销延迟";
+        if (isOwn) note += "。由 FatalCleaner 的“延迟启动”创建，删除即撤销延迟";
 
         var name = path.Substring(path.LastIndexOf('\\') + 1);
         return Build(StartupKind.ScheduledTask, scope, name, command, path, enabled,
@@ -662,7 +662,7 @@ public sealed class StartupManager
                 {
                     var svcName = item.Handle.ServiceName ?? throw new InvalidOperationException("缺少服务名");
                     if (CreateRestorePointForServices)
-                        rp = _restore.EnsureRecent("CleanSweep：修改服务启动类型");
+                        rp = _restore.EnsureRecent("FatalCleaner：修改服务启动类型");
                     _backup.Backup(RegistryPath.Combine(ServicesKey, svcName), $"{verb}服务 {svcName}");
                     SetServiceStartType(svcName, enabled ? ServiceAutoStart : ServiceDemandStart);
                     message = enabled
@@ -697,7 +697,7 @@ public sealed class StartupManager
         }
     }
 
-    /// <summary>删除。注册表值先备份整键；启动文件夹里的文件移入隔离区；只允许删除 CleanSweep 自建的计划任务。</summary>
+    /// <summary>删除。注册表值先备份整键；启动文件夹里的文件移入隔离区；只允许删除 FatalCleaner 自建的计划任务。</summary>
     public StartupChangeResult Delete(StartupItem item)
     {
         var target = $"{item.Kind}:{item.Location}\\{item.Name}";
@@ -740,7 +740,7 @@ public sealed class StartupManager
                 {
                     var path = item.Handle.TaskPath ?? throw new InvalidOperationException("缺少任务路径");
                     if (!path.StartsWith(OwnTaskFolder + "\\", StringComparison.OrdinalIgnoreCase))
-                        return new StartupChangeResult(false, "只允许删除 CleanSweep 自建的任务，其他任务请使用禁用");
+                        return new StartupChangeResult(false, "只允许删除 FatalCleaner 自建的任务，其他任务请使用禁用");
                     dynamic svc = CreateTaskService();
                     dynamic folder = svc.GetFolder(OwnTaskFolder);
                     folder.DeleteTask(path[(path.LastIndexOf('\\') + 1)..], 0);
@@ -800,8 +800,8 @@ public sealed class StartupManager
             catch { folder = root.CreateFolder(OwnTaskFolder); }
 
             dynamic def = svc.NewTask(0);
-            def.RegistrationInfo.Author = "CleanSweep";
-            def.RegistrationInfo.Description = $"由 CleanSweep 创建：登录后延迟 {delaySeconds} 秒启动“{item.Name}”。原启动项（{item.Location}）已禁用但未删除，删除本任务后重新启用原项即可撤销。";
+            def.RegistrationInfo.Author = "FatalCleaner";
+            def.RegistrationInfo.Description = $"由 FatalCleaner 创建：登录后延迟 {delaySeconds} 秒启动“{item.Name}”。原启动项（{item.Location}）已禁用但未删除，删除本任务后重新启用原项即可撤销。";
 
             dynamic settings = def.Settings;
             settings.DisallowStartIfOnBatteries = false;

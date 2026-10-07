@@ -23,6 +23,7 @@ if (Test-Path $svc) { & $svc --uninstall | Out-Null } else { sc.exe delete Clean
 Get-Process CleanSweep.Service -ErrorAction SilentlyContinue | Stop-Process -Force
 
 Remove-Item (Join-Path ([Environment]::GetFolderPath("CommonPrograms")) "CleanSweep.lnk") -Force -ErrorAction SilentlyContinue
+Remove-Item (Join-Path ([Environment]::GetFolderPath("CommonPrograms")) "FatalCleaner.lnk") -Force -ErrorAction SilentlyContinue
 Remove-Item "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CleanSweep" -Recurse -Force -ErrorAction SilentlyContinue
 
 if ($RemoveData) { Remove-Item (Join-Path $env:ProgramData "CleanSweep") -Recurse -Force -ErrorAction SilentlyContinue }

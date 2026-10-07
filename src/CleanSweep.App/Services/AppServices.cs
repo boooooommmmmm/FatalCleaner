@@ -50,7 +50,7 @@ public sealed class AppServices
         CheckAppUpdateAsync, (release, progress, ct) => DownloadAppUpdateAsync(release, progress, ct),
         (release, _) =>
         {
-            var text = $"新版本 {release.Version.ToString(3)} 已下载并校验完成，现在更新吗？\n\n确认后将关闭 CleanSweep、安装更新并重新启动。请先完成当前操作；如需管理员权限，会弹出 UAC。\n\n选择“否”可稍后在设置中安装。";
+            var text = $"新版本 {release.Version.ToString(3)} 已下载并校验完成，现在更新吗？\n\n确认后将关闭 FatalCleaner、安装更新并重新启动。请先完成当前操作；如需管理员权限，会弹出 UAC。\n\n选择“否”可稍后在设置中安装。";
             return Task.FromResult(System.Windows.MessageBox.Show(System.Windows.Application.Current.MainWindow, text,
                 "新版本已准备好", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question)
                 == System.Windows.MessageBoxResult.Yes);

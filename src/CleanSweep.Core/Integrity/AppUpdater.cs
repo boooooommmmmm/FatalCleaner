@@ -16,7 +16,8 @@ namespace CleanSweep.Core.Integrity;
 public sealed record UpdateSources(string DataBaseUrl, string ReleaseInfoUrl, string Display, string? FallbackDataBaseUrl = null, string? FallbackReleaseInfoUrl = null)
 {
     /// <summary>官方仓库：设置为空时用它，用户可改成自己的仓库或 https 根地址。</summary>
-    public const string Default = "boooooommmmmm/Cleaner";
+    public const string Default = "boooooommmmmm/FatalCleaner";
+    public const string LegacyDefault = "boooooommmmmm/Cleaner";
 
     public const string ReleaseInfoPath = "/release/latest.json";
 
@@ -36,6 +37,8 @@ public sealed record UpdateSources(string DataBaseUrl, string ReleaseInfoUrl, st
         var branch = "main";
         var at = s.IndexOf('@');
         if (at > 0) { branch = s[(at + 1)..]; s = s[..at]; }
+        // Saved official repository settings predate the GitHub rename; retain any explicit branch.
+        if (s.Equals(LegacyDefault, StringComparison.OrdinalIgnoreCase)) s = Default;
         var parts = s.Split('/');
         if (parts.Length != 2 || parts.Any(p => p.Length == 0 || p.Any(c => !(char.IsLetterOrDigit(c) || c is '-' or '_' or '.')))) return null;
         if (branch.Length == 0 || branch.Any(c => !(char.IsLetterOrDigit(c) || c is '-' or '_' or '.' or '/'))) return null;

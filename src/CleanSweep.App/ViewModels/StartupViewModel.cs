@@ -296,7 +296,7 @@ public sealed partial class StartupViewModel : ObservableObject
         var hint = row.Item.Kind switch
         {
             StartupKind.StartupFolder => "文件将移入隔离区，可恢复。",
-            StartupKind.ScheduledTask => "这是 CleanSweep 创建的延迟启动任务，删除后请重新启用原启动项。",
+            StartupKind.ScheduledTask => "这是 FatalCleaner 创建的延迟启动任务，删除后请重新启用原启动项。",
             _ => "注册表键会先备份，可在“设置 → 注册表备份”中还原。通常只需“禁用”，无需删除。",
         };
         if (MessageBox.Show($"删除启动项“{row.Name}”？\n\n{hint}", "开机加速", MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK)

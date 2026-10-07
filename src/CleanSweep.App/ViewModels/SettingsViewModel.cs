@@ -129,7 +129,11 @@ public sealed partial class SettingsViewModel : ObservableObject
         _watchUninstalls = s.Settings.WatchUninstalls;
         _updateSource = s.Settings.UpdateSource;
         _checkUpdatesOnStartup = s.Settings.CheckUpdatesOnStartup;
-        s.AppUpdates.PropertyChanged += (_, _) => SyncAppUpdateState();
+        s.AppUpdates.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(AppUpdateCoordinator.Status) or nameof(AppUpdateCoordinator.ReadyRelease)
+                or nameof(AppUpdateCoordinator.IsBusy)) SyncAppUpdateState();
+        };
         SyncAppUpdateState();
         foreach (var r in s.Settings.DevProjectRoots) DevProjectRoots.Add(r);
         Refresh();
@@ -404,7 +408,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         {
             Title = "导出操作日志",
             Filter = "CSV 文件|*.csv",
-            FileName = $"CleanSweep-操作日志-{DateTime.Now:yyyyMMdd-HHmm}.csv",
+            FileName = $"FatalCleaner-操作日志-{DateTime.Now:yyyyMMdd-HHmm}.csv",
         };
         if (dlg.ShowDialog() != true) return;
 

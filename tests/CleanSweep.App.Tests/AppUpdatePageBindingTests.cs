@@ -27,6 +27,7 @@ public sealed class AppUpdatePageBindingTests
                     return "unused.zip";
                 }, (_, _) => throw new Exception("Unexpected prompt"), _ => null, () => { });
             page = new SettingsPage { DataContext = new UpdatePageContext(updates) };
+            ((TabControl)page.FindName("SettingsSections")).SelectedIndex = 2;
             page.Measure(new Size(1400, 1600));
             page.Arrange(new Rect(0, 0, 1400, 1600));
             page.UpdateLayout();

@@ -3,7 +3,7 @@
 # 私钥默认读 %USERPROFILE%\.cleansweep\keys\release-signing-key.pem，不在仓库里。
 # 之后：
 #   1. git add release/latest.json && git commit && git push          （程序从 raw.githubusercontent.com/<repo>/main/release/latest.json 读发布信息）
-#   2. 在 GitHub 上创建 tag v<版本> 的 Release，把 publish/CleanSweep-win-x64-<版本>.zip 作为附件上传（地址必须与 latest.json 里的 url 一致）
+#   2. 在 GitHub 上创建 tag v<版本> 的 Release，把 publish/FatalCleaner-win-x64-<版本>.zip 作为附件上传（地址必须与 latest.json 里的 url 一致）
 #   或者加 -Publish：脚本用 %USERPROFILE%\.cleansweep\github-token.txt 里的细粒度令牌（Contents: Read and write）直接创建 Release、上传 zip、
 #   匿名重新下载核对哈希。前提是当前提交已推送（脚本会 fetch 核对），之后只剩提交并推送 release/latest.json。令牌用完请吊销。
 param(
@@ -29,7 +29,7 @@ try {
     $builtVersion = ((Get-Item $exe).VersionInfo.ProductVersion -split "\+")[0]
     if ($Version -eq "") { $Version = $builtVersion }
     if ([version]$Version -ne [version]$builtVersion) { throw "发布版本 $Version 与程序版本 $builtVersion 不一致" }
-    $asset = "CleanSweep-$Rid-$Version.zip"
+    $asset = "FatalCleaner-$Rid-$Version.zip"
     $zip = "publish/$asset"
     if (Test-Path $zip) { Remove-Item $zip -Force }
     Compress-Archive -Path "publish/$Rid/*" -DestinationPath $zip -CompressionLevel Optimal
@@ -72,7 +72,7 @@ try {
         "X-GitHub-Api-Version" = "2022-11-28"
         "User-Agent"           = "CleanSweep-release-script"
     }
-    $payload = @{ tag_name = "v$Version"; target_commitish = $sha; name = "CleanSweep v$Version"; body = $Notes; draft = $false; prerelease = $false } | ConvertTo-Json -Compress
+    $payload = @{ tag_name = "v$Version"; target_commitish = $sha; name = "FatalCleaner v$Version"; body = $Notes; draft = $false; prerelease = $false } | ConvertTo-Json -Compress
     Write-Host "创建 Release v$Version（$sha）…"
     $rel = Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/$Repo/releases" -Headers $headers -ContentType "application/json; charset=utf-8" -Body ([Text.Encoding]::UTF8.GetBytes($payload))
     $uploadUrl = ($rel.upload_url -replace '\{.*$', '') + "?name=$([Uri]::EscapeDataString($asset))"

@@ -151,13 +151,13 @@ public sealed partial class DiskViewModel : ObservableObject
         // defrag / chkntfs /C 在普通权限下不会执行（defrag 只打印 0x89000024 且退出码为 0），先问是否以管理员身份重新启动
         if (DiskHealth.RequiresElevation(op) && !_s.Elevation.IsElevated)
         {
-            var choice = MessageBox.Show("磁盘优化与检查命令需要管理员身份，当前是普通权限运行。\n\n是否现在以管理员身份重新启动 CleanSweep？重新启动后回到本页再执行。",
+            var choice = MessageBox.Show("磁盘优化与检查命令需要管理员身份，当前是普通权限运行。\n\n是否现在以管理员身份重新启动 FatalCleaner？重新启动后回到本页再执行。",
                 "需要管理员身份", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (choice == MessageBoxResult.Yes)
             {
                 var err = ElevationContext.RelaunchElevated();
                 if (err is null) { Application.Current.Shutdown(0); return; }
-                if (err != "已取消提权") MessageBox.Show($"无法以管理员身份重新启动：{err}", "CleanSweep", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (err != "已取消提权") MessageBox.Show($"无法以管理员身份重新启动：{err}", "FatalCleaner", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             return;
         }

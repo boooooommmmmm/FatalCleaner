@@ -99,7 +99,7 @@ public sealed partial class CleanPageViewModel : ObservableObject
     private void ExportReport()
     {
         var dialog = new SaveFileDialog { Title = "导出清理结果（包含本机路径）", Filter = "JSON 报告 (*.json)|*.json",
-            FileName = $"CleanSweep-result-{DateTime.Now:yyyyMMdd-HHmmss}.json", DefaultExt = ".json" };
+            FileName = $"FatalCleaner-result-{DateTime.Now:yyyyMMdd-HHmmss}.json", DefaultExt = ".json" };
         if (dialog.ShowDialog() != true) return;
         try
         {

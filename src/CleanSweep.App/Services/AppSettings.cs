@@ -97,7 +97,8 @@ public sealed class AppSettings
     {
         DuplicateRoots = (DuplicateRoots ?? new()).Where(r => !string.IsNullOrWhiteSpace(r)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         UpdateSource = (UpdateSource ?? "").Trim();
-        if (UpdateSource.Length == 0) UpdateSource = Core.Integrity.UpdateSources.Default;
+        if (UpdateSource.Length == 0 || UpdateSource.Equals(Core.Integrity.UpdateSources.LegacyDefault, StringComparison.OrdinalIgnoreCase))
+            UpdateSource = Core.Integrity.UpdateSources.Default;
         NavGroupExpanded ??= new();
         CleaningSelections = (CleaningSelections ?? new()).Where(p => p.Value is not null
             && Enum.IsDefined(p.Value.Kind) && Enum.IsDefined(p.Value.Risk))

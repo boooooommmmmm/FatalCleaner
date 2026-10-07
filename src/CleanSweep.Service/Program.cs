@@ -90,13 +90,13 @@ public static class Program
         config.Save();
 
         // 延迟自动启动：装完就能用，重启后也在；普通权限的界面自己启动不了服务
-        var rc = Sc($"create {ServiceName} binPath= \"{exe}\" start= delayed-auto obj= LocalSystem DisplayName= \"CleanSweep 提权服务\"");
+        var rc = Sc($"create {ServiceName} binPath= \"{exe}\" start= delayed-auto obj= LocalSystem DisplayName= \"FatalCleaner 提权服务\"");
         if (rc != 0)
         {
             Console.WriteLine($"sc.exe create 返回 {rc}");
             return rc;
         }
-        Sc($"description {ServiceName} \"CleanSweep 的提权服务：在受保护的命名管道上执行枚举型清理指令。\"");
+        Sc($"description {ServiceName} \"FatalCleaner 的提权服务：在受保护的命名管道上执行枚举型清理指令。\"");
         var start = Sc($"start {ServiceName}");
         var online = false;
         for (int i = 0; i < 20 && !online; i++)

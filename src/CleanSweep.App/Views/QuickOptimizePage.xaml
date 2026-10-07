@@ -1,4 +1,4 @@
-<UserControl x:Class="CleanSweep.App.Views.QuickOptimizePage"
+<UserControl Style="{StaticResource Page}" x:Class="CleanSweep.App.Views.QuickOptimizePage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:h="clr-namespace:CleanSweep.App.Helpers" Background="{StaticResource Brush.Background}">
@@ -19,32 +19,60 @@
         </Style>
     </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Margin="24,22,24,24">
-            <TextBlock Text="一键优化" FontSize="27" FontWeight="Bold"/>
+        <StackPanel Margin="28,24,28,24">
+            <TextBlock Text="一键优化" Style="{StaticResource Text.Title}"/>
             <TextBlock Text="保守清理 · 文件可恢复 · 结果按实测展示" Foreground="#60758B" Margin="0,5,0,18"/>
             <Border CornerRadius="22" Padding="28" MinHeight="270">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#12355B" Offset="0"/>
-                        <GradientStop Color="#0B678C" Offset="0.65"/>
-                        <GradientStop Color="#108B87" Offset="1"/>
+                        <GradientStop Color="#172F49" Offset="0"/>
+                        <GradientStop Color="#164D68" Offset="0.65"/>
+                        <GradientStop Color="#137C80" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
                 <Grid>
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="190"/></Grid.ColumnDefinitions>
                     <StackPanel VerticalAlignment="Center" Margin="0,0,18,0">
-                        <TextBlock Text="C L E A N S W E E P" Foreground="#98E8EC" FontSize="12" FontWeight="SemiBold"/>
+                        <TextBlock Text="F A T A L C L E A N E R" Foreground="#98E8EC" FontSize="12" FontWeight="SemiBold"/>
                         <TextBlock Text="{Binding Headline}" Foreground="White" FontSize="27" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,12,0,8"/>
                         <TextBlock Text="{Binding Detail}" Foreground="#D1E5F0" TextWrapping="Wrap" FontSize="13" MinHeight="42"/>
                         <TextBlock Text="{Binding ScopeSummary}" Foreground="#B1ECE5" TextWrapping="Wrap" FontSize="12" Margin="0,4,0,0"/>
                         <WrapPanel Margin="0,18,0,0">
                             <Button Content="一键优化" Command="{Binding OptimizeCommand}" FontSize="19" FontWeight="Bold" Padding="30,14" Background="#61E7D2" Foreground="#063E47" BorderThickness="0"
                                     AutomationProperties.Name="开始一键优化" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}, ConverterParameter=invert}"/>
-                            <Button Content="停止优化" Command="{Binding OptimizeCancelCommand}" Padding="30,14" FontSize="17" Background="#ECF5FC" Foreground="#174164"
+                            <Button Content="{Binding CancelButtonText}" Command="{Binding OptimizeCancelCommand}" Padding="30,14" FontSize="17" Background="#ECF5FC" Foreground="#174164"
                                     Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}"/>
                         </WrapPanel>
                     </StackPanel>
                     <Grid Grid.Column="1" Width="176" Height="176" VerticalAlignment="Center">
+                        <Ellipse x:Name="CompletionHalo" Stroke="#A1FFEA" StrokeThickness="3" Opacity="0" RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False">
+                            <Ellipse.RenderTransform><ScaleTransform/></Ellipse.RenderTransform>
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding ShowCompletionEffect}" Value="True"/>
+                                                <Condition Binding="{Binding IsVisible, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                                <Condition Binding="{Binding Source={x:Static SystemParameters.ClientAreaAnimation}}" Value="True"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <MultiDataTrigger.EnterActions>
+                                                <BeginStoryboard x:Name="CompletionPulse"><Storyboard FillBehavior="Stop">
+                                                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+                                                        <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                                                        <LinearDoubleKeyFrame Value="0.85" KeyTime="0:0:0.15"/>
+                                                        <LinearDoubleKeyFrame Value="0" KeyTime="0:0:1"/>
+                                                    </DoubleAnimationUsingKeyFrames>
+                                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" From="0.88" To="1.16" Duration="0:0:1"/>
+                                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" From="0.88" To="1.16" Duration="0:0:1"/>
+                                                </Storyboard></BeginStoryboard>
+                                            </MultiDataTrigger.EnterActions>
+                                            <MultiDataTrigger.ExitActions><RemoveStoryboard BeginStoryboardName="CompletionPulse"/></MultiDataTrigger.ExitActions>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
+                        </Ellipse>
                         <Ellipse Stroke="#326B86" StrokeThickness="8"/>
                         <Ellipse Stroke="#80F1DB" StrokeThickness="8" StrokeDashArray="12 50" RenderTransformOrigin="0.5,0.5">
                             <Ellipse.RenderTransform><RotateTransform/></Ellipse.RenderTransform>
@@ -59,7 +87,7 @@
                                             </MultiDataTrigger.Conditions>
                                             <MultiDataTrigger.EnterActions>
                                                 <BeginStoryboard x:Name="Orbit"><Storyboard>
-                                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)" From="0" To="360" Duration="0:0:2.4" RepeatBehavior="Forever"/>
+                                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)" From="0" To="360" Duration="0:0:1.5" RepeatBehavior="Forever"/>
                                                 </Storyboard></BeginStoryboard>
                                             </MultiDataTrigger.EnterActions>
                                             <MultiDataTrigger.ExitActions><RemoveStoryboard BeginStoryboardName="Orbit"/></MultiDataTrigger.ExitActions>
@@ -78,9 +106,33 @@
                     </Grid>
                 </Grid>
             </Border>
-            <ProgressBar Value="{Binding Progress, Mode=OneWay}" Maximum="100" Height="4" Foreground="#0B9D94" Background="#E4EEEF" BorderThickness="0" Margin="16,10,16,5"/>
+            <ProgressBar Style="{StaticResource Progress.Solid}" Value="{Binding Progress, Mode=OneWay}" Maximum="100" Height="4" Foreground="#0B9D94" Background="#E4EEEF" BorderThickness="0" Margin="16,10,16,5"/>
             <TextBlock Text="{Binding ResultSummary}" Foreground="#60758B" TextWrapping="Wrap" Margin="5,5,5,10"/>
-            <UniformGrid Columns="2" Margin="-5,0,-5,0">
+            <TextBlock Text="本次优化结果" FontSize="17" FontWeight="SemiBold" Margin="0,10,0,10" Visibility="{Binding HasResult, Converter={StaticResource BoolToVis}}"/>
+            <UniformGrid Columns="2" Margin="-5,0,-5,0" Visibility="{Binding HasResult, Converter={StaticResource BoolToVis}}">
+                <UniformGrid.RenderTransform><TranslateTransform/></UniformGrid.RenderTransform>
+                <UniformGrid.Style>
+                    <Style TargetType="UniformGrid">
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding HasResult}" Value="True"/>
+                                    <Condition Binding="{Binding IsVisible, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                    <Condition Binding="{Binding Source={x:Static SystemParameters.ClientAreaAnimation}}" Value="True"/>
+                                </MultiDataTrigger.Conditions>
+                                <MultiDataTrigger.EnterActions>
+                                    <BeginStoryboard x:Name="RevealResults"><Storyboard FillBehavior="Stop">
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.3" To="1" Duration="0:0:0.65"/>
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="12" To="0" Duration="0:0:0.65">
+                                            <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard></BeginStoryboard>
+                                </MultiDataTrigger.EnterActions>
+                                <MultiDataTrigger.ExitActions><RemoveStoryboard BeginStoryboardName="RevealResults"/></MultiDataTrigger.ExitActions>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </UniformGrid.Style>
                 <Border Style="{StaticResource MetricCard}"><StackPanel>
                     <TextBlock Text="已整理到隔离区" FontWeight="SemiBold"/>
                     <h:AnimatedMetric Style="{StaticResource MetricNumber}" Value="{Binding QuarantinedBytes}"/>
@@ -88,18 +140,18 @@
                 </StackPanel></Border>
                 <Border Style="{StaticResource MetricCard}"><StackPanel>
                     <TextBlock Text="本次直接释放磁盘空间" FontWeight="SemiBold"/>
-                    <h:AnimatedMetric Style="{StaticResource MetricNumber}" Value="{Binding FreedBytes}"/>
+                    <h:AnimatedMetric Style="{StaticResource MetricNumber}" Value="{Binding FreedBytes}" DelayMilliseconds="100"/>
                     <TextBlock Text="以清理引擎结果为准；移入隔离区不计入" Style="{StaticResource Text.Subtitle}"/>
                 </StackPanel></Border>
                 <Border Style="{StaticResource MetricCard}"><StackPanel>
                     <TextBlock Text="可用内存变化" FontWeight="SemiBold"/>
-                    <h:AnimatedMetric Style="{StaticResource MetricNumber}" Value="{Binding MemoryDelta}" Kind="signedBytes"/>
+                    <h:AnimatedMetric Style="{StaticResource MetricNumber}" Value="{Binding MemoryDelta}" Kind="signedBytes" DelayMilliseconds="200"/>
                     <TextBlock Text="{Binding MemoryDetail}" Style="{StaticResource Text.Subtitle}"/>
                     <TextBlock Text="{Binding MemoryMessage}" Style="{StaticResource Text.Subtitle}" Margin="0,5,0,0"/>
                 </StackPanel></Border>
                 <Border Style="{StaticResource MetricCard}"><StackPanel>
                     <TextBlock Text="最近一次开机耗时" FontWeight="SemiBold"/>
-                    <h:AnimatedMetric Style="{StaticResource MetricNumber}" Value="{Binding BootSeconds}" Kind="seconds"/>
+                    <h:AnimatedMetric Style="{StaticResource MetricNumber}" Value="{Binding BootSeconds}" Kind="seconds" DelayMilliseconds="300"/>
                     <TextBlock Text="本次未调整启动项；开机改善尚未测量" Style="{StaticResource Text.Subtitle}"/>
                     <Button Content="查看开机记录 →" Command="{Binding NavigateCommand}" CommandParameter="开机加速" Style="{StaticResource Button.Link}" HorizontalAlignment="Left" Margin="-6,6,0,0"/>
                 </StackPanel></Border>

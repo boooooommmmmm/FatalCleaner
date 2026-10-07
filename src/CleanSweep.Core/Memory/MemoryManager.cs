@@ -187,7 +187,7 @@ public sealed class MemoryManager
     private static (bool, string?) Protection(Process p, string name, string? path, int me)
     {
         if (p.Id is 0 or 4) return (true, "系统进程");
-        if (p.Id == me) return (true, "CleanSweep 自身");
+        if (p.Id == me) return (true, "FatalCleaner 自身");
         if (NeverKill.Contains(name) || NeverKill.Contains(p.ProcessName)) return (true, "系统关键进程");
         try
         {

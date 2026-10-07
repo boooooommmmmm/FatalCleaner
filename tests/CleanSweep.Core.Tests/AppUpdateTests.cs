@@ -73,7 +73,7 @@ public sealed class AppUpdateTests : IDisposable
         Assert.Equal("https://raw.githubusercontent.com/someone/CleanSweep/main/release/latest.json", gh.ReleaseInfoUrl);
         Assert.Equal("https://raw.githubusercontent.com/someone/CleanSweep/dev", UpdateSources.Resolve("someone/CleanSweep@dev")!.DataBaseUrl);
         Assert.Equal("https://updates.example.com/cs", UpdateSources.Resolve("https://updates.example.com/cs/")!.DataBaseUrl);
-        Assert.Equal("https://raw.githubusercontent.com/boooooommmmmm/Cleaner/main", UpdateSources.Resolve("")!.DataBaseUrl); // 空 = 官方仓库
+        Assert.Equal("https://raw.githubusercontent.com/boooooommmmmm/FatalCleaner/main", UpdateSources.Resolve("")!.DataBaseUrl); // 空 = 官方仓库
         Assert.Null(UpdateSources.Resolve("http://updates.example.com/cs"));
         Assert.Null(UpdateSources.Resolve("a/b/c"));
         Assert.Null(UpdateSources.Resolve("some one/repo"));

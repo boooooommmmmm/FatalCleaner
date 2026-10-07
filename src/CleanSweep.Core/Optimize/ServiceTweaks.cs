@@ -150,7 +150,7 @@ public sealed class ServiceTweaks
             }
 
             RestorePointOutcome? rp = null;
-            if (CreateRestorePoint) rp = _restore.EnsureRecent("CleanSweep：服务优化");
+            if (CreateRestorePoint) rp = _restore.EnsureRecent("FatalCleaner：服务优化");
             _backup.Backup(RegistryPath.Combine(ServicesKey, serviceName), $"{(manual ? "优化" : "恢复")}服务 {serviceName}");
             if (recordOriginal is { } orig) SaveRecord(serviceName, new TweakRecord((int)orig, DateTime.UtcNow));
             SetStartType(serviceName, target);
