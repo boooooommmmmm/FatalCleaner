@@ -1,11 +1,11 @@
 {
-  "version": "0.22.0",
-  "asset": "CleanSweep-win-x64-0.22.0.zip",
-  "url": "https://github.com/boooooommmmmm/Cleaner/releases/download/v0.22.0/CleanSweep-win-x64-0.22.0.zip",
-  "sha256": "a91712906a5b54d9b66c211ecc0f29eb36dfa676e012286567e480961e46c203",
-  "size": 65566453,
-  "notes": "# CleanSweep v0.22.0\n\n## 一键优化首页\n\n- 侧栏顶部固定入口，打开程序默认进入首页。\n- 默认整理当前用户 7 天以上的临时文件、Windows 网页缓存，以及 30 天以上的 .NET 使用日志；文件逐个移入隔离区，可恢复。\n- 蓝绿渐变主卡、执行进度环与数字动画，分别显示整理文件数、隔离体积、实际直接释放量、可用内存变化和最近开机耗时。\n- 可选释放低优先级待机缓存，默认关闭，需管理员权限；跳过或失败会明确提示。内存变化可能受其他程序活动影响，不保证提速。\n- 可停止任务并保留已完成结果；处理期间防止更新安装、管理员重启及其他页面操作中断任务。\n\n隔离文件仍占用磁盘空间，到期或永久删除后才释放。首页不自动改动启动项，不估算开机提速百分比。\n\n## 百度网盘临时文件\n\n- “应用缓存 → 百度网盘”支持默认 Documents/BaiduNetdiskTmp 顶层超过 7 天未修改的 `*.tmp.node`。\n- 需用户确认，首次默认不选；保留其他文件、子目录和目录本身，建议退出网盘并确认任务结束后再清理。\n- 目录存在性检测兼容旧客户端的规则更新，同名普通文件不会作为候选。该规则不参加首页一键优化。\n\n## 修复\n\n- 单文件扫描也遵守文件模式和排除模式，避免目录位置被同名文件替代后扩大清理范围。\n- 执行前复查规则、项目和路径白名单，排除项的前置动作不再执行。\n- 请求的内存操作未完成时，首页不再显示无条件完成标题。\n\n规则库升级到版本 6，共 75 条规则。程序更新继续采用后台下载、签名校验后询问是否安装的流程。\n",
-  "generated": "2026-10-02T14:47:40Z",
+  "version": "0.23.0",
+  "asset": "FatalCleaner-win-x64-0.23.0.zip",
+  "url": "https://github.com/boooooommmmmm/FatalCleaner/releases/download/v0.23.0/FatalCleaner-win-x64-0.23.0.zip",
+  "sha256": "71c9ae212c42ccd284ed27ad9e93f16dac6353dba2173fc0a16a4ac0e2394a89",
+  "size": 66649097,
+  "notes": "# FatalCleaner v0.23.0\n\nCleanSweep 正式更名为 **FatalCleaner**，GitHub 仓库同步更名为 `boooooommmmmm/FatalCleaner`。\n\n## 新品牌与图标\n\n- 主窗口、侧栏、更新提示、程序属性及导出文件名使用 FatalCleaner。\n- 使用全新的硬盘与扫帚图标，支持 Windows 多种图标尺寸，应用于程序、窗口和侧栏。\n- 发布包更名为 `FatalCleaner-win-x64-0.23.0.zip`。\n\n## 界面整理\n\n- 统一导航、按钮、卡片、输入框和表格样式，页面布局更清晰。\n- 设置页分为“常规与清理”“备份与白名单”“更新与记录”，程序更新独立展示。\n- 内存页分为“运行中的进程”和“后台运行权限”，进程列表获得完整宽度。\n- 一键优化首页在处理完成后再展示结果卡，减少初始页面的信息干扰。\n\n## 一键优化动画\n\n- 增加完成光环、结果卡入场和数字依次变化效果。\n- 快速任务正常完成后补足约 3 秒的展示节奏，真实处理时间计入其中。\n- 提前结束时明确显示工作已经完成，可点击“立即查看结果”跳过动画。\n- 系统关闭动画、取消或处理失败时不增加展示等待；所有结果仍按实际测量显示。\n\n## 修复与更新兼容\n\n- 合并高频下载进度通知，固定提示区域，减少下载过程中界面闪烁。\n- 默认更新来源切换至新仓库，兼容已保存的旧官方来源，保留自定义来源和指定分支。\n- 更新仍采用后台下载并校验、询问用户后安装的流程。\n\n## 升级说明\n\n- 保留 `CleanSweep.exe`、原数据目录、隔离区和服务标识，兼容已有安装与更新流程。\n- 解压 ZIP 后运行 `CleanSweep.exe`；界面和产品名称已是 FatalCleaner。\n- 本包为 Windows x64 自包含版本，无需另行安装 .NET。\n- 旧快捷方式或已登记的系统显示名称可能保留；程序文件中的图标已更新。\n- 规则库仍为 v6，指纹库及弹窗规则仍为 v5。\n",
+  "generated": "2026-10-07T01:58:03Z",
   "keyId": "release-2026-09",
-  "signature": "UiJnH+DL0DJApj813DGO/dT6LOmRQW6srmARI/KgkZ30gQr9P+dHlWPq+46Hw0YIByQEQHIN11q9DkV1+UXOLA=="
+  "signature": "O6zxkPGtIpfhR0c6NOC4sRbxO89HOamcprrFz4RqDC9FrMq23PVxQEk3sINgDB2w1VJfyVcT8NB0loAX5faq0Q=="
 }
