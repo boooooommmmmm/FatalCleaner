@@ -135,6 +135,7 @@ public sealed class BuildOutputScanner(IReadOnlyList<string> projectRoots) : ISc
             {
                 Id = id, ModuleId = Id, Group = ".NET 项目构建产物", DisplayName = Path.GetFileName(project),
                 Path = projectDir, Kind = ItemKind.FileSet, Risk = RiskLevel.Confirm,
+                RequiresFreshSelection = true,
                 Files = files.Values.OrderBy(f => f.Path, StringComparer.OrdinalIgnoreCase).ToArray(),
                 SizeBytes = files.Values.Sum(f => f.Size), LastWriteUtc = files.Values.Max(f => f.LastWriteUtc),
                 TargetSnapshot = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(evidence.ToString()))),

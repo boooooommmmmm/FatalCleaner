@@ -78,6 +78,10 @@ public sealed class Quarantine
         try { return System.Security.Principal.WindowsIdentity.GetCurrent().User?.Value; } catch { return null; }
     });
 
+    // A process user's dependency guard cannot classify another user's original paths.
+    // Keep foreign/unowned records for explicit handling; SYSTEM must not auto-purge user data.
+    internal string? AutomaticMaintenanceSid { get; init; } = ProcessUserSid.Value;
+
     /// <summary>隔离项的对象标识：原路径 + 隔离路径 + 移入时间的哈希。界面把它随 ID 一起交给服务，服务核对自己索引里的同一条，防止两份索引的数字 ID 撞车。</summary>
     public static string ObjectKey(QuarantineEntry e) =>
         Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(
@@ -271,7 +275,7 @@ public sealed class Quarantine
         int purged = 0;
         foreach (var e in ListActive().Where(e => e.ExpiresUtc <= now))
         {
-            if (PreserveDeveloperEntry(e)) continue;
+            if (PreserveAutomaticEntry(e)) continue;
             try
             {
                 Purge(e.Id);
@@ -306,7 +310,7 @@ public sealed class Quarantine
             foreach (var e in group.OrderBy(e => e.QuarantinedUtc))
             {
                 if (total <= limit) break;
-                if (PreserveDeveloperEntry(e)) continue;
+                if (PreserveAutomaticEntry(e)) continue;
                 try
                 {
                     Purge(e.Id);
@@ -322,8 +326,12 @@ public sealed class Quarantine
         return purged;
     }
 
-    private bool PreserveDeveloperEntry(QuarantineEntry entry) =>
-        entry.ModuleId == "dev-cache" || _guard?.IsDeveloperDataProtected(entry.OriginalPath) == true;
+    private bool PreserveAutomaticEntry(QuarantineEntry entry) =>
+        string.IsNullOrWhiteSpace(AutomaticMaintenanceSid)
+        || AutomaticMaintenanceSid is "S-1-5-18" or "S-1-5-19" or "S-1-5-20"
+        || string.IsNullOrWhiteSpace(entry.OwnerSid)
+        || !string.Equals(entry.OwnerSid, AutomaticMaintenanceSid, StringComparison.OrdinalIgnoreCase)
+        || entry.ModuleId == "dev-cache" || _guard?.IsDeveloperDataProtected(entry.OriginalPath) == true;
 
     // ---------- 一致性 ----------
 

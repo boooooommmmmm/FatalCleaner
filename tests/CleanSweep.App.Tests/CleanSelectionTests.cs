@@ -60,6 +60,33 @@ public sealed class CleanSelectionTests : IDisposable
     }
 
     [Fact]
+    public void Rebuilt_project_with_new_outputs_does_not_reuse_old_confirmation()
+    {
+        var settings = AppSettings.Load(SettingsFile);
+        var old = Row("project", RiskLevel.Confirm, module: "build-output").Item with
+        {
+            TargetSnapshot = "old-evidence", Files = [new(@"C:\repo\bin\App.dll", 10, DateTime.UtcNow.AddDays(-10))]
+        };
+        // Persist a v0.25.0 choice, which did not carry RequiresFreshSelection.
+        settings.RememberCleaningSelection(old, true);
+        settings.Save();
+        var current = old with
+        {
+            RequiresFreshSelection = true, TargetSnapshot = "new-evidence",
+            Files = [new(@"C:\repo\bin\App.dll", 20, DateTime.UtcNow.AddDays(-2)),
+                new(@"C:\repo\bin\New.dll", 30, DateTime.UtcNow.AddDays(-2))]
+        };
+        var row = new ScanItemViewModel(current);
+        Page(AppSettings.Load(SettingsFile), row);
+        Assert.False(row.IsSelected);
+        row.IsSelected = true;
+        Assert.True(row.IsSelected);
+        var nextScan = new ScanItemViewModel(current);
+        Page(AppSettings.Load(SettingsFile), nextScan);
+        Assert.False(nextScan.IsSelected);
+    }
+
+    [Fact]
     public void Risk_filter_and_sort_preserve_saved_selection_without_rewriting_settings()
     {
         var safe = Row("safe");

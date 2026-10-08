@@ -51,6 +51,8 @@ public sealed class BuildOutputTests : IDisposable
         Assert.Equal(ItemKind.FileSet, item.Kind);
         Assert.Equal(RiskLevel.Confirm, item.Risk);
         Assert.False(item.DefaultSelected);
+        Assert.True(item.RequiresFreshSelection);
+        Assert.True(CleanSweep.Core.Safety.DeveloperCachePolicy.IsDeveloperCache(item));
         Assert.Equal(2, item.Files.Count);
         Assert.Contains(item.Files, f => f.Path == Output);
         Assert.Contains(item.Files, f => f.Path == generated);
