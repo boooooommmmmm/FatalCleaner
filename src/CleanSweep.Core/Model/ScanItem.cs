@@ -60,6 +60,9 @@ public sealed record ScanItem
 
     public RiskLevel Risk { get; init; } = RiskLevel.Safe;
 
+    /// <summary>每次扫描都需重新选择，不能恢复上一次的勾选（例如会影响构建的开发缓存）。</summary>
+    public bool RequiresFreshSelection { get; init; }
+
     public string Description { get; init; } = "";
 
     public DateTime? LastWriteUtc { get; init; }

@@ -62,13 +62,24 @@ public sealed class DevCacheScanner : IScanner
                     Path = cache,
                     Files = files,
                     SizeBytes = size,
-                    Risk = RiskLevel.Safe,
-                    Description = (fp.Note ?? "开发工具缓存，删除后按需重新下载").TrimEnd('。') + "。只清缓存，配置文件不受影响",
+                    Risk = RiskLevel.Confirm,
+                    Description = DeveloperCachePolicy.Warning,
                     LastWriteUtc = files.Max(f => f.LastWriteUtc),
                 });
                 bytes += size;
             }
         }
+
+        // Share the exact rules, IDs, risk levels and age cutoffs with the application-cache page.
+        // Do not derive a broader cache scope from legacy JetBrains fingerprints.
+        var jetBrainsContext = new ScanContext
+        {
+            Env = ctx.Env, Guard = ctx.Guard, Whitelist = ctx.Whitelist, AdvancedMode = ctx.AdvancedMode,
+            Rules = ctx.Rules.Where(r => r.Id == "jetbrains.ide").ToArray(),
+        };
+        var jetBrainsItems = RuleScanner.AppCache().ScanAsync(jetBrainsContext, null, ct).GetAwaiter().GetResult();
+        items.AddRange(jetBrainsItems);
+        bytes += jetBrainsItems.Sum(i => i.SizeBytes);
 
         // 2. conda 环境：用户数据，只列出
         if (ctx.Env.Variables.TryGetValue("UserProfile", out var profile))

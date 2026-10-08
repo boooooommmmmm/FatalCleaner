@@ -247,10 +247,8 @@ public sealed class ResidueScannerTests : IDisposable
 
         var items = await Scan(FingerprintTests.Snapshot(), fps);
 
-        Assert.Equal(2, items.Count);
-        var g = items.Single(i => i.Path!.Equals(gradle, StringComparison.OrdinalIgnoreCase));
-        Assert.Equal(RiskLevel.Safe, g.Risk);
-        Assert.Equal("Gradle 残留", g.Group);
+        Assert.Single(items);
+        Assert.DoesNotContain(items, i => i.Path!.Equals(gradle, StringComparison.OrdinalIgnoreCase));
         var j = items.Single(i => i.Path!.Equals(jb, StringComparison.OrdinalIgnoreCase));
         Assert.Equal(RiskLevel.Confirm, j.Risk);
         Assert.Contains("许可证", j.Description);
@@ -408,7 +406,7 @@ public sealed class DevCacheScannerTests : IDisposable
     public void Dispose() => _t.Dispose();
 
     [Fact]
-    public async Task Lists_cache_paths_and_stale_node_modules()
+    public async Task Protects_dependency_caches_but_lists_stale_node_modules_for_confirmation()
     {
         var caches = _t.Dir(Path.Combine(_t.Vars["UserProfile"], ".gradle", "caches"));
         _t.File(Path.Combine(caches, "a.jar"), "12345");
@@ -431,11 +429,8 @@ public sealed class DevCacheScannerTests : IDisposable
         var ctx = new ScanContext { Env = _t.Env, Guard = _t.Guard, Whitelist = new Whitelist() };
         var items = await new DevCacheScanner(fps, new[] { project, fresh }, 30).ScanAsync(ctx, null, default);
 
-        Assert.Equal(2, items.Count);
-        var cache = items.Single(i => i.Group == "Gradle");
-        Assert.Equal(ItemKind.FileSet, cache.Kind);
-        Assert.Single(cache.Files);
-        Assert.Equal(RiskLevel.Safe, cache.Risk);
+        Assert.Single(items);
+        Assert.DoesNotContain(items, i => i.Group == "Gradle");
         var node = items.Single(i => i.Group.Contains("node_modules"));
         Assert.Equal(Path.Combine(project, "node_modules"), node.Path, ignoreCase: true);
         Assert.Equal(RiskLevel.Confirm, node.Risk);

@@ -137,8 +137,8 @@
       "paths": ["%AppData%\\JetBrains", "%LocalAppData%\\JetBrains"],
       "detect": { "anyOf": [ { "installedPublisher": "JetBrains" }, { "directory": "%LocalAppData%\\Programs\\IntelliJ IDEA" }, { "registry": "HKCU\\Software\\JetBrains" } ] },
       "flags": ["license", "devCache"],
-      "cachePaths": ["%LocalAppData%\\JetBrains"],
-      "note": "%AppData%\\JetBrains 含 IDE 配置、密钥与许可证；%LocalAppData%\\JetBrains 是索引缓存，可在保留配置的前提下清理。"
+      "cachePaths": [],
+      "note": "%AppData%\\JetBrains 含 IDE 配置、密钥与许可证；%LocalAppData%\\JetBrains 同时含缓存和 Local History。仅由专用规则清理已确认的缓存、旧日志和临时文件，保留历史记录。"
     },
     {
       "id": "adobe", "app": "Adobe Creative Cloud", "publisher": "Adobe",

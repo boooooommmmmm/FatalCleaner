@@ -93,7 +93,15 @@ public sealed record AppFingerprint(
     /// <summary>按给定用户环境展开 Paths；展开失败的跳过。</summary>
     public IEnumerable<string> ExpandPaths(IEnvironmentResolver env) => Expand(RawPaths, env);
 
-    public IEnumerable<string> ExpandCachePaths(IEnvironmentResolver env) => Expand(RawCachePaths, env);
+    public IEnumerable<string> ExpandCachePaths(IEnvironmentResolver env)
+    {
+        // Older signed fingerprints classified the entire JetBrains system directory as cache.
+        // It also contains Local History. Only the dedicated rules may select its subdirectories.
+        var jetBrains = env.Variables.TryGetValue("LocalAppData", out var local)
+            ? Path.Combine(local, "JetBrains") : null;
+        return Expand(RawCachePaths, env).Where(p => jetBrains is null
+            || (!PathGuard.IsSameOrUnder(p, jetBrains) && !PathGuard.IsSameOrUnder(jetBrains, p)));
+    }
 
     private static IEnumerable<string> Expand(IEnumerable<string> raws, IEnvironmentResolver env)
     {

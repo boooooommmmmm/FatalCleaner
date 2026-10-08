@@ -16,6 +16,7 @@ public sealed class PreparedAppUpdateStore(string directory, IReadOnlyDictionary
         if (release.Asset != Path.GetFileName(release.Asset) || release.Asset.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
             throw new InvalidDataException("更新资产文件名无效");
         Directory.CreateDirectory(directory);
+        using var cacheLock = UpdateCacheLock.Acquire(directory);
         var temporary = IndexPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
         try
         {
@@ -29,6 +30,8 @@ public sealed class PreparedAppUpdateStore(string directory, IReadOnlyDictionary
     {
         try
         {
+            if (!Directory.Exists(directory)) return null;
+            using var cacheLock = UpdateCacheLock.Acquire(directory);
             var entry = JsonSerializer.Deserialize<Entry>(File.ReadAllText(IndexPath));
             if (entry is null || entry.Source != source || string.IsNullOrWhiteSpace(entry.Asset)
                 || entry.Asset != Path.GetFileName(entry.Asset) || entry.Asset.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0

@@ -152,8 +152,8 @@ public sealed partial class ShellViewModel : ObservableObject
         {
             Group = "清理", Title = "开发者缓存", Glyph = "",
             Page = new CleanPageViewModel(s, "开发者缓存",
-                "Gradle、Maven、NuGet、npm、pip、Docker 等工具的缓存目录，只清缓存不清配置；项目中长期未动的 node_modules；conda 环境只列出不默认勾选。" +
-                "在“设置”中添加项目根目录后才会查找 node_modules。",
+                "NuGet、Maven 等已识别依赖仓库与运行环境受保护。其余开发缓存可能影响构建，每次扫描后需手动确认；保留 JetBrains Local History。" +
+                "在“设置”中添加项目根目录；构建产物默认不勾选，逐文件移入隔离区，请先关闭构建、调试和运行中的项目。",
                 s.CreateDevCacheScanners, DevNote),
         });
         Add(new NavItem
@@ -208,8 +208,8 @@ public sealed partial class ShellViewModel : ObservableObject
     private string? DevNote()
     {
         var disks = DevCacheScanner.DockerDisks(_s.Env);
-        if (disks.Count == 0) return null;
-        return "Docker Desktop 的 WSL 虚拟磁盘只显示体积，不提供删除：" + string.Join("；", disks.Select(d => $"{d.Path}（{Format.Bytes(d.Size)}）")) +
+        if (disks.Count == 0) return _s.BuildOutputScanNote;
+        return _s.BuildOutputScanNote + "\nDocker Desktop 的 WSL 虚拟磁盘只显示体积，不提供删除：" + string.Join("；", disks.Select(d => $"{d.Path}（{Format.Bytes(d.Size)}）")) +
                "。可在 Docker Desktop 中执行 docker system prune 后压缩磁盘。";
     }
 

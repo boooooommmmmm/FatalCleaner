@@ -33,6 +33,15 @@ public sealed partial class AppUpdateCoordinator : ObservableObject
     public bool InstallationStarted { get; private set; }
     public bool CanCancel => IsBusy && _workCancellation is { IsCancellationRequested: false } && !InstallationStarted;
 
+    /// <summary>缓存预览与清理期间暂停更新检查、恢复和安装，保护内存中的待安装包。</summary>
+    public async Task<bool> MaintainCacheAsync(Func<string?, Task> action)
+    {
+        if (IsBusy || InstallationStarted) return false;
+        IsBusy = true;
+        try { await action(ReadyRelease?.Asset); return true; }
+        finally { IsBusy = false; }
+    }
+
     public AppUpdateCoordinator(Func<CancellationToken, Task<AppUpdateCheck>> check,
         Func<ReleaseInfo, IProgress<(long Done, long Total)>, CancellationToken, Task<string>> download,
         Func<ReleaseInfo, string, Task<bool>> confirm, Func<string, string?> launch, Action shutdown,

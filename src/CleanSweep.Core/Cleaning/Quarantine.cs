@@ -89,6 +89,8 @@ public sealed class Quarantine
     public QuarantineEntry MoveIn(string path, bool isDirectory, long sizeBytes, string moduleId, string batchId, string displayName)
     {
         var full = PathGuard.Normalize(path);
+        if (_guard?.IsDeveloperDataProtected(full) == true)
+            throw new IOException("开发依赖或运行环境受保护，不允许移入隔离区");
         if (!IsSafeName(batchId)) throw new ArgumentException("批次 ID 非法", nameof(batchId));
         if (!(isDirectory ? Directory.Exists(full) : File.Exists(full)))
             throw new FileNotFoundException("要隔离的对象不存在", full);
@@ -269,6 +271,7 @@ public sealed class Quarantine
         int purged = 0;
         foreach (var e in ListActive().Where(e => e.ExpiresUtc <= now))
         {
+            if (PreserveDeveloperEntry(e)) continue;
             try
             {
                 Purge(e.Id);
@@ -303,6 +306,7 @@ public sealed class Quarantine
             foreach (var e in group.OrderBy(e => e.QuarantinedUtc))
             {
                 if (total <= limit) break;
+                if (PreserveDeveloperEntry(e)) continue;
                 try
                 {
                     Purge(e.Id);
@@ -317,6 +321,9 @@ public sealed class Quarantine
         }
         return purged;
     }
+
+    private bool PreserveDeveloperEntry(QuarantineEntry entry) =>
+        entry.ModuleId == "dev-cache" || _guard?.IsDeveloperDataProtected(entry.OriginalPath) == true;
 
     // ---------- 一致性 ----------
 

@@ -83,16 +83,26 @@ public sealed class RuleScanner : IScanner
             {
                 ct.ThrowIfCancellationRequested();
                 var item = BuildItem(rule, target, ctx, ct, path, match);
-                if (item is not null) yield return item;
+                if (item is not null) yield return ApplySelectionPolicy(rule, item);
             }
             yield break;
         }
         var single = BuildItem(rule, target, ctx, ct, target.ExpandedPath, null);
-        if (single is not null) yield return single;
+        if (single is not null) yield return ApplySelectionPolicy(rule, single);
     }
+
+    private static ScanItem ApplySelectionPolicy(CleanRule rule, ScanItem item) => rule.Category == "dev"
+        ? item with { RequiresFreshSelection = true, Description = item.Description + "。" + DeveloperCachePolicy.Warning }
+        : item;
 
     private ScanItem? BuildItem(CleanRule rule, RuleTarget target, ScanContext ctx, CancellationToken ct, string? expandedPath, string? match)
     {
+        if (rule.Category == "dev")
+            target = target with
+            {
+                Risk = target.Risk == RiskLevel.Safe ? RiskLevel.Confirm : target.Risk,
+                Description = target.Description.Replace("可安全清理", "需确认后清理", StringComparison.Ordinal),
+            };
         var id = MakeId(Id, rule.Id, expandedPath ?? target.Command ?? target.Kind.ToString());
         var displayName = string.IsNullOrEmpty(match) ? target.Description : $"{target.Description}（{match}）";
 

@@ -1,10 +1,10 @@
 {
   "kind": "fingerprints",
-  "version": 5,
-  "generated": "2026-09-30T06:43:13Z",
+  "version": 6,
+  "generated": "2026-10-08T03:09:36Z",
   "files": {
-    "fingerprints.json": "5758d1d0a46005f700f513ddc0e349afa88f8f9f98536bd6cf1ee2ba36cfacb3"
+    "fingerprints.json": "5f956e1d679b7a577d42f92287a89f23d7107b0c68d04a9a48e1c12d08c22a9f"
   },
   "keyId": "release-2026-09",
-  "signature": "gwHgA1BimlnHMtYDhIZbYDpyo2qIYuBpRJ4s93RZM1AXAXcrZe2wOxBjBMyMipPjU8WMxjXSNxXZQGjkhhF7TQ=="
+  "signature": "qjWfD//zPjnls93YnEhL1RHhOl5nVp/PRibZzNTANebRE2Z5JhbRJvZvueU2WE7M1Xk048H0OxQantAuwfSTVA=="
 }

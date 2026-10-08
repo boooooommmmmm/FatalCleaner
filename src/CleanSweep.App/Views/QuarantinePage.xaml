@@ -18,6 +18,7 @@
         <StackPanel Grid.Row="0">
             <TextBlock Text="隔离区" Style="{StaticResource Text.Title}"/>
             <TextBlock Text="这里保存移入隔离区的文件。到期或超过容量上限时可能自动淘汰；未永久删除前可恢复。" Style="{StaticResource Text.Subtitle}" Margin="0,4,0,0"/>
+            <TextBlock Text="开发者缓存及已识别的受保护依赖保留至手动处理，不自动淘汰；如构建异常，请优先恢复。" Style="{StaticResource Text.Secondary}" TextWrapping="Wrap" Margin="0,4,0,0"/>
         </StackPanel>
 
         <!-- 按磁盘概览 -->

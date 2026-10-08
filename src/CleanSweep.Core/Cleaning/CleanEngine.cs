@@ -100,9 +100,11 @@ public sealed class CleanEngine
     private readonly Whitelist? _whitelist;
     private readonly RegistryCleaning.RegistryOps? _registry;
     private readonly Func<CancellationToken, Task<IReadOnlyList<ScanItem>>>? _orphanRecheck;
+    private readonly Func<ScanItem, CancellationToken, Task<bool>>? _buildOutputRecheck;
 
     public CleanEngine(PathGuard guard, Quarantine quarantine, OperationLog log, IPreActionRunner preActions, Whitelist? whitelist = null, RegistryCleaning.RegistryOps? registry = null,
-        Func<CancellationToken, Task<IReadOnlyList<ScanItem>>>? orphanRecheck = null)
+        Func<CancellationToken, Task<IReadOnlyList<ScanItem>>>? orphanRecheck = null,
+        Func<ScanItem, CancellationToken, Task<bool>>? buildOutputRecheck = null)
     {
         _guard = guard;
         _quarantine = quarantine;
@@ -111,6 +113,7 @@ public sealed class CleanEngine
         _whitelist = whitelist;
         _registry = registry;
         _orphanRecheck = orphanRecheck;
+        _buildOutputRecheck = buildOutputRecheck;
     }
 
     public async Task<CleanReport> CleanAsync(IReadOnlyList<ScanItem> items, IProgress<CleanProgress>? progress, CancellationToken ct)
@@ -142,7 +145,7 @@ public sealed class CleanEngine
             }
 
             // 预动作去重后各执行一次。失败的动作记入 failedActions，依赖它的项目跳过
-            foreach (var action in items.Where(i => !IsExcluded(i)).SelectMany(i => i.PreActions).Distinct(StringComparer.OrdinalIgnoreCase))
+            foreach (var action in items.Where(i => !IsExcluded(i) && !ObsoleteDeveloperSelection(i)).SelectMany(i => i.PreActions).Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 ct.ThrowIfCancellationRequested();
                 var handle = _preActions.Run(action, out var err);
@@ -165,7 +168,11 @@ public sealed class CleanEngine
                 progress?.Report(new CleanProgress(item.DisplayName, done, items.Count, report.ProcessedBytes));
 
                 var blocked = item.PreActions.FirstOrDefault(failedActions.Contains);
-                if (item.ModuleId == Residue.OrphanDirectoryScanner.ModuleId && !OrphanStillEligible(item, currentOrphans))
+                if (ObsoleteDeveloperSelection(item))
+                {
+                    Skip(report, batchId, item, item.Path, "开发者缓存的安全分级已失效，请重新扫描并手动确认", CleanIssueKind.Changed);
+                }
+                else if (item.ModuleId == Residue.OrphanDirectoryScanner.ModuleId && !OrphanStillEligible(item, currentOrphans))
                 {
                     Skip(report, batchId, item, item.Path, orphanReason, CleanIssueKind.Changed);
                 }
@@ -176,6 +183,10 @@ public sealed class CleanEngine
                 else if (IsExcluded(item))
                 {
                     Skip(report, batchId, item, item.Path, "项目、规则或目标路径已在白名单");
+                }
+                else if (item.ModuleId == Residue.BuildOutputScanner.ModuleId && !await BuildOutputStillEligible(item, ct).ConfigureAwait(false))
+                {
+                    Skip(report, batchId, item, item.Path, "构建依据、项目范围或进程状态已变化，或无法完成复核；请关闭构建/调试程序后重新扫描", CleanIssueKind.Changed);
                 }
                 else
                 {
@@ -208,6 +219,17 @@ public sealed class CleanEngine
     private bool IsExcluded(ScanItem item) => _whitelist is not null && (_whitelist.IsItemExcluded(item.Id)
         || item.RuleId is { } rule && _whitelist.IsRuleExcluded(rule)
         || item.Path is { } path && _whitelist.IsPathExcluded(path));
+
+    private static bool ObsoleteDeveloperSelection(ScanItem item) =>
+        DeveloperCachePolicy.IsDeveloperCache(item) && item.Risk == RiskLevel.Safe;
+
+    private async Task<bool> BuildOutputStillEligible(ScanItem item, CancellationToken ct)
+    {
+        if (_buildOutputRecheck is null) return false;
+        try { return await _buildOutputRecheck(item, ct).ConfigureAwait(false); }
+        catch (OperationCanceledException) { throw; }
+        catch { return false; }
+    }
 
     private static bool OrphanStillEligible(ScanItem item, IReadOnlyList<ScanItem> current)
     {

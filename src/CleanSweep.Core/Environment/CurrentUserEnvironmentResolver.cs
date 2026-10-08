@@ -29,6 +29,8 @@ public sealed partial class CurrentUserEnvironmentResolver : IEnvironmentResolve
             ["ProgramFilesX86"] = SysEnv.GetFolderPath(SysEnv.SpecialFolder.ProgramFilesX86),
             ["Public"] = SysEnv.GetEnvironmentVariable("PUBLIC") ?? Path.Combine(sysDrive + "\\", "Users", "Public"),
         };
+        foreach (var name in Safety.DeveloperCachePolicy.EnvironmentVariables)
+            if (SysEnv.GetEnvironmentVariable(name) is { Length: > 0 } value) _vars[name] = value;
     }
 
     /// <summary>测试用：注入自定义变量表。</summary>

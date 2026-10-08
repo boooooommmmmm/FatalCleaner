@@ -187,6 +187,7 @@ public sealed class AppUpdater
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(outerCt, timeout.Token);
         var ct = linked.Token;
         Directory.CreateDirectory(stagingRoot);
+        using var cacheLock = UpdateCacheLock.Acquire(stagingRoot);
         var target = Path.Combine(stagingRoot, release.Asset);
         if (reuseExisting && await Task.Run(() => ReleaseManifest.VerifyAsset(release, target) is null, ct).ConfigureAwait(false))
         {

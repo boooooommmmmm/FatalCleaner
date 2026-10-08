@@ -39,7 +39,7 @@ public sealed class AppSettings
     /// <summary>卸载后即时残留提醒：程序运行期间监听卸载事件。</summary>
     public bool WatchUninstalls { get; set; }
 
-    /// <summary>开发者缓存页的项目根目录（查找 node_modules 等）。</summary>
+    /// <summary>开发者缓存页的项目根目录（查找闲置 node_modules 和有生成依据的 .NET 构建产物）。</summary>
     public List<string> DevProjectRoots { get; set; } = new();
 
     /// <summary>弹窗拦截：程序运行期间按规则关闭弹窗。</summary>
@@ -65,9 +65,12 @@ public sealed class AppSettings
 
     private static string SelectionKey(ScanItem item) => JsonSerializer.Serialize(new[] { SelectionUser, item.ModuleId, item.Id });
 
-    public bool CleaningSelectionFor(ScanItem item) =>
-        CleaningSelections.TryGetValue(SelectionKey(item), out var saved) && saved is not null
-        && saved.Kind == item.Kind && saved.Risk == item.Risk ? saved.Selected : item.DefaultSelected;
+    public bool CleaningSelectionFor(ScanItem item)
+    {
+        if (CleanSweep.Core.Safety.DeveloperCachePolicy.IsDeveloperCache(item)) return false;
+        return CleaningSelections.TryGetValue(SelectionKey(item), out var saved) && saved is not null
+            && saved.Kind == item.Kind && saved.Risk == item.Risk ? saved.Selected : item.DefaultSelected;
+    }
 
     public void RememberCleaningSelection(ScanItem item, bool selected) =>
         CleaningSelections[SelectionKey(item)] = new CleaningSelection(selected, item.Kind, item.Risk);

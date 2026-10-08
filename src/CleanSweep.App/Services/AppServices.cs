@@ -115,7 +115,9 @@ public sealed class AppServices
         var registryOps = new RegistryOps(registryBackup);
         AppServices? services = null;
         var engine = new CleanEngine(guard, quarantine, log, preActions, whitelist, registryOps,
-            ct => services!.CreateOrphanDirectoryScanners()[0].ScanAsync(services.CreateScanContext(), null, ct));
+            ct => services!.CreateOrphanDirectoryScanners()[0].ScanAsync(services.CreateScanContext(), null, ct),
+            (item, ct) => new BuildOutputScanner(services!.Settings.DevProjectRoots.ToList())
+                .StillEligibleAsync(item, services.CreateScanContext(), ct));
         var restorePoints = new RestorePointService();
         var startup = new StartupManager(env, registryBackup, restorePoints, quarantine, log)
         {
@@ -314,10 +316,14 @@ public sealed class AppServices
     public IScanner[] CreateOrphanDirectoryScanners(IReadOnlyCollection<string> appNames) =>
         [new OrphanDirectoryScanner(ct => Inventory.Scan(ct), Fingerprints, UninstallHistory, appNames)];
 
-    public IScanner[] CreateDevCacheScanners() => new IScanner[]
+    private BuildOutputScanner? _buildOutputScanner;
+    public string? BuildOutputScanNote => _buildOutputScanner?.Note;
+
+    public IScanner[] CreateDevCacheScanners()
     {
-        new DevCacheScanner(Fingerprints, Settings.DevProjectRoots.ToList()),
-    };
+        _buildOutputScanner = new BuildOutputScanner(Settings.DevProjectRoots.ToList());
+        return [new DevCacheScanner(Fingerprints, Settings.DevProjectRoots.ToList()), _buildOutputScanner];
+    }
 
     public IScanner[] CreateRegistryScanners() => new IScanner[]
     {

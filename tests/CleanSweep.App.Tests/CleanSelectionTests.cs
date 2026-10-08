@@ -38,6 +38,27 @@ public sealed class CleanSelectionTests : IDisposable
         Assert.True(confirmAgain.IsSelected);
     }
 
+    [Theory]
+    [InlineData("dev-cache", null)]
+    [InlineData("app-cache", "dev.pip")]
+    [InlineData("app-cache", "new-tool-without-prefix")]
+    public void Developer_caches_require_a_fresh_choice_even_after_a_saved_confirmation(string module, string? rule)
+    {
+        var settings = AppSettings.Load(SettingsFile);
+        var item = Row("dependency", RiskLevel.Confirm, module: module).Item with
+            { RuleId = rule, RequiresFreshSelection = rule == "new-tool-without-prefix" };
+        settings.RememberCleaningSelection(item, true);
+        settings.Save();
+        var row = new ScanItemViewModel(item);
+        Page(AppSettings.Load(SettingsFile), row);
+        Assert.False(row.IsSelected);
+        row.IsSelected = true;
+        Assert.True(row.IsSelected);
+        var nextScan = new ScanItemViewModel(item);
+        Page(AppSettings.Load(SettingsFile), nextScan);
+        Assert.False(nextScan.IsSelected);
+    }
+
     [Fact]
     public void Risk_filter_and_sort_preserve_saved_selection_without_rewriting_settings()
     {

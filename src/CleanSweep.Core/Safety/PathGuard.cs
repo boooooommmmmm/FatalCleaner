@@ -124,6 +124,7 @@ public sealed class PathGuard
     private readonly string[] _protectedRoots;
     private readonly string[] _tooBroadRoots;
     private readonly string[] _userProtected;
+    private readonly string[] _developerProtected;
 
     public PathGuard(IEnvironmentResolver env)
     {
@@ -131,6 +132,8 @@ public sealed class PathGuard
         _windir = Normalize(env.Variables["Windir"]);
 
         var v = env.Variables;
+        _developerProtected = DeveloperCachePolicy.ProtectedRoots(v).Select(Normalize)
+            .Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
         _protectedRoots = new[]
             {
                 v.GetValueOrDefault("ProgramFiles"),
@@ -207,6 +210,13 @@ public sealed class PathGuard
     /// </summary>
     public PathVerdict CheckRestoreTarget(string fullPath) => CheckCore(fullPath, forRestore: true);
 
+    /// <summary>Active dependency repositories are not cleanup targets, even when a stale rule says safe.</summary>
+    public bool IsDeveloperDataProtected(string path)
+    {
+        var full = Normalize(path);
+        return _developerProtected.Any(p => IsSameOrUnder(full, p) || IsSameOrUnder(p, full));
+    }
+
     private static readonly string[] RestoreAllowedUserProtected = { "Start Menu", "Themes" };
 
     private static bool IsSingleShortcutFile(string full)
@@ -223,7 +233,7 @@ public sealed class PathGuard
         }
     }
 
-    private PathVerdict CheckCore(string fullPath, bool forRestore)
+    private PathVerdict CheckCore(string fullPath, bool forRestore, bool forRuleValidation = false)
     {
         string full;
         try
@@ -240,6 +250,9 @@ public sealed class PathGuard
 
         if (IsVolumeRoot(full))
             return PathVerdict.Deny("不允许以卷根目录为目标", full);
+
+        if (!forRestore && !forRuleValidation && IsDeveloperDataProtected(full))
+            return PathVerdict.Deny("开发依赖或运行环境受保护，清理可能导致构建或程序失效", full);
 
         // 卷级保护对象：C:\System Volume Information、C:\$Recycle.Bin、C:\Recovery ...
         var root = Path.GetPathRoot(full)!;
@@ -309,7 +322,8 @@ public sealed class PathGuard
         if (expanded.Contains('%'))
             return PathVerdict.Deny("展开后仍含未解析变量");
 
-        return Check(expanded);
+        // Keep old signed datasets readable; each concrete target is checked again at scan/execution time.
+        return CheckCore(expanded, forRestore: false, forRuleValidation: true);
     }
 
     // ---------- 通配目录段 ----------

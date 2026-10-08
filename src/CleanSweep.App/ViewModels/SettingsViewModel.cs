@@ -95,6 +95,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     public string AppVersionText => $"当前版本 {_s.CurrentVersion.ToString(3)}";
     public AppUpdateCoordinator Updates => _s.AppUpdates;
+    public UpdateCacheViewModel UpdateCache { get; }
 
     [ObservableProperty]
     private string _backupSummary = "";
@@ -122,6 +123,12 @@ public sealed partial class SettingsViewModel : ObservableObject
     public SettingsViewModel(AppServices s)
     {
         _s = s;
+        UpdateCache = new UpdateCacheViewModel(s.AppUpdates,
+            asset => Task.Run(() => new Core.Integrity.UpdateCacheInventory(AppPaths.AppUpdateStagingDir, s.CurrentVersion, s.CreateScanContext()).Preview(asset)),
+            (items, asset) => Task.Run(() => new Core.Integrity.UpdateCacheInventory(AppPaths.AppUpdateStagingDir, s.CurrentVersion, s.CreateScanContext()).CleanAsync(items, asset, s.Engine)),
+            (count, bytes) => Task.FromResult(MessageBox.Show(
+                $"将选中的 {count} 个更新缓存文件（{Format.Bytes(bytes)}）移入隔离区？\n\n执行前会复核待安装包和文件状态。可从隔离区恢复；到期或永久删除后释放空间。",
+                "清理更新缓存", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes));
         _advancedMode = s.Settings.AdvancedMode;
         _retentionDays = s.Settings.RetentionDays;
         _createRestorePoint = s.Settings.CreateRestorePoint;
@@ -170,7 +177,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private void AddDevRoot()
     {
-        var dlg = new OpenFolderDialog { Title = "选择项目根目录（其下的 node_modules 会被查找）" };
+        var dlg = new OpenFolderDialog { Title = "选择项目根目录（查找闲置依赖和 .NET 构建产物）" };
         if (dlg.ShowDialog() != true) return;
         if (DevProjectRoots.Contains(dlg.FolderName, StringComparer.OrdinalIgnoreCase)) return;
         DevProjectRoots.Add(dlg.FolderName);
