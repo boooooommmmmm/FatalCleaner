@@ -1,11 +1,11 @@
 {
-  "version": "0.25.0",
-  "asset": "FatalCleaner-win-x64-0.25.0.zip",
-  "url": "https://github.com/boooooommmmmm/FatalCleaner/releases/download/v0.25.0/FatalCleaner-win-x64-0.25.0.zip",
-  "sha256": "19a5f4f0b1578d10b5efb8ab2b9cab835238e0df08f22020378a1773c44c5adf",
-  "size": 106041987,
-  "notes": "修复开发依赖误清理；保护 NuGet 等依赖与 JetBrains Local History；新增构建产物预览和程序更新缓存管理。",
-  "generated": "2026-10-08T08:03:38Z",
+  "version": "0.25.1",
+  "asset": "FatalCleaner-win-x64-0.25.1.zip",
+  "url": "https://github.com/boooooommmmmm/FatalCleaner/releases/download/v0.25.1/FatalCleaner-win-x64-0.25.1.zip",
+  "sha256": "b3edbcc9313666185ae4cc037853d414784cfc70f4bb55593791dfd29dd38bd1",
+  "size": 106039161,
+  "notes": "修复跨用户隔离记录自动淘汰保护；.NET 构建产物每次扫描重新勾选。",
+  "generated": "2026-10-08T08:35:28Z",
   "keyId": "release-2026-09",
-  "signature": "Yx7Gy2zhendF1rmstqKFh/8r8s00z64J/cuILKIrSH6+KNF9u2cr8sJ95Ec5Gp0JGPH9D+LCroNvHxcP9zpiWw=="
+  "signature": "ExCCyAYSaV5lEGo8uJTdv6/lq8hoaMZY3htu3a8f7tiaNRSiJzcUZhrW8kN4jVKS32FQh3qrTRePDqwjbQ+JSg=="
 }
